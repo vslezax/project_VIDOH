@@ -39,6 +39,8 @@
     color: transparent;
 
     filter: drop-shadow(0 0 var(--textTitle_drop-shadow-size) var(--color_purple-haze));
+
+    padding-right: 4px; /* fix cutting right side*/
 }
 .textSubtitle{
     font-family: var(--font-codenext);

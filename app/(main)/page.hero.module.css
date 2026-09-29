@@ -39,6 +39,8 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+
+    padding-right: 4px; /* fix cutting right side*/
 }
 .subtitle{
     font-family: var(--font-codenext);
