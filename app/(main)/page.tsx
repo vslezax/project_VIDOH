@@ -11,7 +11,7 @@ import ButtonMap from "./_button_ToMap/buttonToMap"
 export default function Home() {
   return (
     <main className={`flex flex-col`}>
-      <div className={`${hero.hero} ${heroScale.root}`}>
+      <div className={`${hero.main} ${heroScale.root}`}>
         <div className={hero.content}>
           <div className={hero.text}>
             <div className={hero.titleSubtitle}>
