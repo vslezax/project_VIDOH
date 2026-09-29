@@ -1,0 +1,457 @@
+// =====================================================
+// ENUMS
+// =====================================================
+
+enum user_status {
+  pending
+  active
+  blocked
+  deleted
+}
+
+enum organizer_status {
+  draft
+  active
+  suspended
+  archived
+}
+
+enum organizer_legal_form {
+  individual
+  legal_entity
+}
+
+enum event_status {
+  draft
+  published
+  postponed
+  cancelled
+  finished
+  archived
+}
+
+enum media_role {
+  main
+  gallery
+  logo
+  icon
+  cover
+  avatar
+}
+
+enum link_type {
+  ticket_sale
+  website
+  social
+  stream
+  other
+}
+
+enum legal_document_type {
+  service_rules
+  payment_rules
+  safety_rules
+  refund_policy
+  other
+}
+
+enum review_status {
+  pending
+  published
+  rejected
+}
+
+enum order_status {
+  pending
+  paid
+  cancelled
+  refunded
+  failed
+}
+
+enum ticket_status {
+  issued
+  used
+  cancelled
+  refunded
+}
+
+enum promo_discount_type {
+  percent
+  fixed
+}
+
+// =====================================================
+// USERS & AUTH
+// =====================================================
+
+Table users {
+  id                 bigint       [pk, increment]
+  uuid               uuid         [unique, not null]
+  email              citext       [unique]
+  phone              varchar(20)  [unique]
+  password_hash      text
+  first_name         varchar(100)
+  last_name          varchar(100)
+  display_name       varchar(150)
+  avatar_media_id    bigint       [ref: > media.id]
+  status             user_status  [not null, default: 'pending']
+  locale             varchar(10)  [default: 'ru']
+  email_verified_at  timestamptz
+  phone_verified_at  timestamptz
+  last_login_at      timestamptz
+  created_at         timestamptz  [not null]
+  updated_at         timestamptz  [not null]
+  deleted_at         timestamptz
+  Note: 'Потребитель сервиса. Не связан с organizers.'
+}
+
+Table roles {
+  id    smallint     [pk, increment]
+  code  varchar(50)  [unique, not null, note: 'user | moderator | admin']
+  name  varchar(100) [not null]
+}
+
+Table user_roles {
+  user_id     bigint     [ref: > users.id]
+  role_id     smallint   [ref: > roles.id]
+  granted_at  timestamptz [not null]
+  granted_by  bigint     [ref: > users.id]
+  indexes { (user_id, role_id) [pk] }
+}
+
+Table user_sessions {
+  id                  bigint       [pk, increment]
+  user_id             bigint       [ref: > users.id, not null]
+  refresh_token_hash  varchar(255) [unique, not null]
+  user_agent          varchar(255)
+  ip                  inet
+  expires_at          timestamptz  [not null]
+  revoked_at          timestamptz
+  created_at          timestamptz  [not null]
+}
+
+// =====================================================
+// ORGANIZERS
+// =====================================================
+
+Table organizers {
+  id                 bigint                [pk, increment]
+  uuid               uuid                  [unique, not null]
+  slug               varchar(160)          [unique, not null]
+  name               varchar(200)          [not null]
+  short_description  varchar(500)
+  description        text
+  avatar_media_id    bigint                [ref: > media.id]
+  cover_media_id     bigint                [ref: > media.id]
+  legal_form         organizer_legal_form  [not null, default: 'legal_entity']
+  inn                varchar(12)
+  ogrn               varchar(15)
+  status             organizer_status      [not null, default: 'draft']
+  contact_email      citext
+  contact_phone      varchar(20)
+  website_url        text
+  verified_at        timestamptz
+  created_by         bigint                [ref: > users.id, note: 'модератор']
+  created_at         timestamptz           [not null]
+  updated_at         timestamptz           [not null]
+  deleted_at         timestamptz
+  Note: 'Единое физлицо/юрлицо. Не связан с users. Управляется модератором.'
+}
+
+// =====================================================
+// GEOGRAPHY
+// =====================================================
+
+Table countries {
+  id    smallserial  [pk]
+  name  varchar(100) [not null]
+  iso   char(2)      [unique, not null]
+}
+
+Table cities {
+  id          bigint       [pk, increment]
+  country_id  smallint     [ref: > countries.id, not null]
+  name        varchar(150) [not null]
+  slug        varchar(160) [not null]
+  lat         numeric(9,6)
+  lng         numeric(9,6)
+  indexes { (country_id, slug) [unique] }
+  Note: 'Без timezone — время события хранится в events.utc_offset.'
+}
+
+Table venues {
+  id          bigint       [pk, increment]
+  city_id     bigint       [ref: > cities.id, not null]
+  slug        varchar(180) [not null]
+  name        varchar(200) [not null]
+  address     text
+  metro       varchar(150)
+  lat         numeric(9,6)
+  lng         numeric(9,6)
+  capacity    integer
+  created_at  timestamptz  [not null]
+  updated_at  timestamptz  [not null]
+  indexes { (city_id, slug) [unique] }
+}
+
+// =====================================================
+// CATEGORIES
+// =====================================================
+
+Table categories {
+  id             bigint       [pk, increment]
+  slug           varchar(160) [unique, not null]
+  name           varchar(150) [not null]
+  description    text
+  icon_media_id  bigint       [ref: > media.id]
+  parent_id      bigint       [ref: > categories.id]
+  sort_order     integer      [not null, default: 0]
+  created_at     timestamptz  [not null]
+  updated_at     timestamptz  [not null]
+  deleted_at     timestamptz
+}
+
+// =====================================================
+// MEDIA
+// =====================================================
+
+Table media {
+  id            bigint       [pk, increment]
+  storage_key   text         [unique, not null]
+  url           text         [not null]
+  mime_type     varchar(100)
+  kind          varchar(20)  [not null, note: 'image | video | doc']
+  width         integer
+  height        integer
+  size_bytes    bigint
+  alt           varchar(255)
+  uploaded_by   bigint       [ref: > users.id]
+  created_at    timestamptz  [not null]
+  Note: 'Единая библиотека файлов для всех сущностей.'
+}
+
+Table event_media {
+  event_id    bigint      [ref: > events.id]
+  media_id    bigint      [ref: > media.id]
+  role        media_role  [not null, default: 'gallery']
+  sort_order  integer     [not null, default: 0]
+  caption     varchar(255)
+  indexes { (event_id, media_id, role) [pk] }
+  Note: 'Один role=main на событие (partial unique).'
+}
+
+Table organizer_media {
+  organizer_id  bigint      [ref: > organizers.id]
+  media_id      bigint      [ref: > media.id]
+  role          media_role  [not null, default: 'gallery']
+  sort_order    integer     [not null, default: 0]
+  indexes { (organizer_id, media_id, role) [pk] }
+}
+
+Table category_media {
+  category_id  bigint      [ref: > categories.id]
+  media_id     bigint      [ref: > media.id]
+  role         media_role  [not null, default: 'icon']
+  sort_order   integer     [not null, default: 0]
+  indexes { (category_id, media_id, role) [pk] }
+}
+
+// =====================================================
+// EVENTS
+// =====================================================
+
+Table events {
+  id                 bigint        [pk, increment]
+  uuid               uuid          [unique, not null]
+  slug               varchar(200)  [unique, not null]
+  title              varchar(255)  [not null]
+  short_description  varchar(500)
+  description        text
+  venue_id           bigint        [ref: > venues.id, note: 'nullable для онлайна']
+  online_url         text
+  start_at           timestamptz   [not null]
+  end_at             timestamptz   [not null]
+  utc_offset         varchar(6)    [not null, note: 'формат ±HH:MM, задаёт модератор']
+  status             event_status  [not null, default: 'draft']
+  age_rating         smallint
+  is_free            boolean       [not null, default: false]
+  currency           char(3)       [default: 'RUB']
+  capacity           integer
+  published_at       timestamptz
+  created_by         bigint        [ref: > users.id, note: 'модератор']
+  created_at         timestamptz   [not null]
+  updated_at         timestamptz   [not null]
+  deleted_at         timestamptz
+  Note: 'CHECK: end_at > start_at; venue_id IS NOT NULL OR online_url IS NOT NULL.'
+}
+
+Table event_sessions {
+  id          bigint        [pk, increment]
+  event_id    bigint        [ref: > events.id, not null]
+  venue_id    bigint        [ref: > venues.id]
+  start_at    timestamptz   [not null]
+  end_at      timestamptz   [not null]
+  utc_offset  varchar(6)    [not null]
+  capacity    integer
+  status      event_status  [not null, default: 'published']
+  Note: 'CHECK: end_at > start_at.'
+}
+
+Table event_organizers {
+  event_id      bigint      [ref: > events.id]
+  organizer_id  bigint      [ref: > organizers.id]
+  is_primary    boolean     [not null, default: false]
+  role          varchar(100)
+  sort_order    integer     [not null, default: 0]
+  confirmed_at  timestamptz
+  indexes { (event_id, organizer_id) [pk] }
+  Note: 'Один is_primary=true на событие (partial unique).'
+}
+
+Table event_categories {
+  event_id     bigint   [ref: > events.id]
+  category_id  bigint   [ref: > categories.id]
+  is_primary   boolean  [not null, default: false]
+  sort_order   integer  [not null, default: 0]
+  indexes { (event_id, category_id) [pk] }
+  Note: 'Один is_primary=true на событие (partial unique).'
+}
+
+Table event_links {
+  id          bigint      [pk, increment]
+  event_id    bigint      [ref: > events.id, not null]
+  type        link_type   [not null]
+  url         text        [not null]
+  title       varchar(150)
+  sort_order  integer     [not null, default: 0]
+}
+
+Table event_legal_documents {
+  id          bigint                 [pk, increment]
+  event_id    bigint                 [ref: > events.id, not null]
+  type        legal_document_type    [not null]
+  title       varchar(255)           [not null]
+  content     text
+  url         text
+  sort_order  integer                [not null, default: 0]
+  created_at  timestamptz            [not null]
+  updated_at  timestamptz            [not null]
+  Note: 'Правила услуги, оплаты, ТБ, возврата. Несколько на событие.'
+}
+
+// =====================================================
+// TICKETS
+// =====================================================
+
+Table tickets {
+  id            bigint        [pk, increment]
+  event_id      bigint        [ref: > events.id, not null]
+  session_id    bigint        [ref: > event_sessions.id]
+  name          varchar(150)  [not null]
+  description   text
+  price         numeric(12,2) [not null, default: 0, note: 'единая цена, правит модератор']
+  currency      char(3)       [not null, default: 'RUB']
+  quantity      integer
+  sold_count    integer       [not null, default: 0]
+  external_url  text
+  sort_order    integer       [not null, default: 0]
+  created_at    timestamptz   [not null]
+  updated_at    timestamptz   [not null]
+  Note: 'CHECK: price >= 0; quantity IS NULL OR quantity >= 0.'
+}
+
+// =====================================================
+// PROMO
+// =====================================================
+
+Table promo_codes {
+  id              bigint               [pk, increment]
+  code            varchar(64)          [unique, not null]
+  event_id        bigint               [ref: > events.id]
+  discount_type   promo_discount_type  [not null]
+  discount_value  numeric(12,2)        [not null]
+  max_uses        integer
+  used_count      integer              [not null, default: 0]
+  valid_from      timestamptz
+  valid_to        timestamptz
+  is_active       boolean              [not null, default: true]
+}
+
+// =====================================================
+// USER INTERACTIONS
+// =====================================================
+
+Table user_favorites {
+  user_id     bigint       [ref: > users.id]
+  event_id    bigint       [ref: > events.id]
+  created_at  timestamptz  [not null]
+  indexes { (user_id, event_id) [pk] }
+}
+
+Table event_reviews {
+  id          bigint         [pk, increment]
+  event_id    bigint         [ref: > events.id, not null]
+  user_id     bigint         [ref: > users.id, not null]
+  rating      smallint       [not null, note: 'CHECK 1..5']
+  text        text
+  status      review_status  [not null, default: 'published']
+  created_at  timestamptz    [not null]
+  updated_at  timestamptz    [not null]
+  indexes { (event_id, user_id) [unique] }
+}
+
+// =====================================================
+// ORDERS
+// =====================================================
+
+Table orders {
+  id             bigint         [pk, increment]
+  uuid           uuid           [unique, not null]
+  user_id        bigint         [ref: > users.id, not null]
+  event_id       bigint         [ref: > events.id, not null]
+  session_id     bigint         [ref: > event_sessions.id]
+  status         order_status   [not null, default: 'pending']
+  total_amount   numeric(12,2)  [not null, default: 0]
+  currency       char(3)        [not null, default: 'RUB']
+  promo_code_id  bigint         [ref: > promo_codes.id]
+  created_at     timestamptz    [not null]
+  paid_at        timestamptz
+  cancelled_at   timestamptz
+}
+
+Table order_items {
+  id                    bigint        [pk, increment]
+  order_id              bigint        [ref: > orders.id, not null]
+  ticket_id             bigint        [ref: > tickets.id, not null]
+  quantity              smallint      [not null, note: 'CHECK > 0']
+  unit_price            numeric(12,2) [not null]
+  total_price           numeric(12,2) [not null]
+  event_title_snapshot  varchar(255)
+  ticket_name_snapshot  varchar(150)
+  Note: 'Снапшоты для сохранения истории при изменении события/билета.'
+}
+
+Table issued_tickets {
+  id             bigint         [pk, increment]
+  uuid           uuid           [unique, not null]
+  order_item_id  bigint         [ref: > order_items.id, not null]
+  user_id        bigint         [ref: > users.id, not null]
+  event_id       bigint         [ref: > events.id, not null]
+  code           varchar(64)    [unique, not null, note: 'для QR']
+  status         ticket_status  [not null, default: 'issued']
+  checked_in_at  timestamptz
+  created_at     timestamptz    [not null]
+}
+
+Table payments {
+  id            bigint        [pk, increment]
+  order_id      bigint        [ref: > orders.id, not null]
+  provider      varchar(50)   [not null]
+  provider_txn  varchar(150)
+  amount        numeric(12,2) [not null]
+  currency      char(3)       [not null]
+  status        varchar(30)   [not null]
+  raw_payload   jsonb
+  created_at    timestamptz   [not null]
+}

@@ -1,0 +1,43 @@
+erDiagram
+  USERS ||--o{ USER_ROLES : has
+  ROLES ||--o{ USER_ROLES : grants
+  USERS ||--o{ USER_SESSIONS : opens
+  USERS ||--o{ USER_FAVORITES : adds
+  USERS ||--o{ EVENT_REVIEWS : writes
+  USERS ||--o{ ORDERS : places
+  USERS ||--o{ ISSUED_TICKETS : owns
+
+  ORGANIZERS ||--o{ ORGANIZER_MEDIA : has
+  ORGANIZERS ||--o{ EVENT_ORGANIZERS : "участвует в"
+  EVENTS ||--o{ EVENT_ORGANIZERS : "имеет"
+
+  COUNTRIES ||--o{ CITIES : contains
+  CITIES ||--o{ VENUES : contains
+  VENUES ||--o{ EVENTS : "проводит"
+  VENUES ||--o{ EVENT_SESSIONS : "проводит"
+
+  CATEGORIES ||--o{ CATEGORIES : "parent of"
+  CATEGORIES ||--o{ CATEGORY_MEDIA : has
+  CATEGORIES ||--o{ EVENT_CATEGORIES : "применяется к"
+  EVENTS ||--o{ EVENT_CATEGORIES : "имеет"
+
+  MEDIA ||--o{ EVENT_MEDIA : "используется в"
+  MEDIA ||--o{ ORGANIZER_MEDIA : "используется в"
+  MEDIA ||--o{ CATEGORY_MEDIA : "используется в"
+
+  EVENTS ||--o{ EVENT_SESSIONS : "повторяется"
+  EVENTS ||--o{ EVENT_MEDIA : has
+  EVENTS ||--o{ EVENT_LINKS : has
+  EVENTS ||--o{ EVENT_LEGAL_DOCUMENTS : has
+  EVENTS ||--o{ TICKETS : sells
+  EVENT_SESSIONS ||--o{ TICKETS : "может иметь"
+
+  EVENTS ||--o{ EVENT_REVIEWS : "получает"
+  EVENTS ||--o{ USER_FAVORITES : "в избранном"
+  EVENTS ||--o{ ORDERS : "заказан"
+  EVENTS ||--o{ PROMO_CODES : "скидка на"
+
+  ORDERS ||--o{ ORDER_ITEMS : contains
+  TICKETS ||--o{ ORDER_ITEMS : "в заказе"
+  ORDER_ITEMS ||--o{ ISSUED_TICKETS : generates
+  ORDERS ||--o{ PAYMENTS : "оплачивается"
