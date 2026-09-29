@@ -1,0 +1,118 @@
+.main{
+    width: var(--mainEvent_main-container-width);
+    height: var(--mainEvent_main-container-height);
+
+    border-radius: 12px;
+    overflow: hidden;
+
+    filter: drop-shadow(0 18px 55px color-mix(in srgb, var(--color_purple-haze) 30%, transparent));
+    box-shadow: inset 0 0 20px color-mix(in srgb, var(--color_purple-haze) 50%, transparent);
+}
+
+.darkRectangle,
+.purpleRectangle{
+    position: absolute;
+    width: 100%;
+    height: 50%;
+
+    top: 100%;
+    transform: translate(0%, -100%);
+}
+.darkRectangle{
+    background: var(--gradient_ver-Bt);
+}
+.purpleRectangle{
+    background: var(--gradient_ver-Pt);
+    opacity: .5;
+}
+
+.content{
+    width: 90%;
+    height: fit-content;
+
+    position: absolute;
+    top: var(--mainEvent_content-top);
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+.date{
+    width: fit-content;
+    height: fit-content;
+
+    font-family: var(--font-onest);
+    line-height: 1.3;
+    font-size: var(--mainEvent_date-text-size);
+    font-weight: 500;
+
+    color: var(--color_flowered-white);
+
+    background-color: rgba(255, 255, 255, .3);
+    border-radius: 100px;
+    padding:
+            var(--mainEvent_date-padding-topBottom)
+            var(--mainEvent_date-padding-leftRight)
+            var(--mainEvent_date-padding-topBottom)
+            var(--mainEvent_date-padding-leftRight);
+}
+.infoContainer{
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--mainEvent_infoContainer-gap);
+}
+.locationContainer{
+    width: 90%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: row;
+    gap: var(--mainEvent_locationContainer-gap);
+}
+.pinIcon{
+    width: var(--mainEvent_pinIcon-width);
+    height: var(--mainEvent_pinIcon-height);
+}
+.location{
+    font-family: var(--font-onest);
+    line-height: 1.3;
+    font-size: var(--mainEvent_location-text-size);
+    font-weight: 500;
+
+    color: var(--color_flowered-white);
+}
+.nameContainer{
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+}
+.name{
+    width: 100%;
+    font-family: var(--font-codenext);
+    font-style: italic;
+    line-height: 1;
+    font-size: var(--mainEvent_name-text-size);
+
+    color: var(--color_lemon-zest);
+}
+.description{
+    width: 90%;
+
+    font-family: var(--font-onest);
+    line-height: 1.3;
+    font-size: var(--mainEvent_description-text-size);
+    font-weight: 500;
+
+    color: var(--color_flowered-white);
+}
+
+.image{
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+}

@@ -1,0 +1,115 @@
+.main{
+    display: flex;
+    flex-direction: column;
+}
+
+.hero{
+    width: 100vw;
+    height: 100vh;
+
+    background-color: white;
+}
+.content{
+    width: fit-content;
+    height: fit-content;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--main-page_content-gap);
+}
+.text{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--main-page_text-gap);
+}
+.titleSubtitle{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.title{
+    font-family: var(--font-codenext);
+    font-style: italic;
+    line-height: 1;
+    font-size: var(--main-page_title-text-size);
+    font-weight: 800;
+
+    background: var(--gradient_hor-PYP);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+.subtitle{
+    font-family: var(--font-codenext);
+    line-height: 1;
+    font-size: var(--main-page_subtitle-text-size);
+    font-weight: 800;
+
+    color: var(--color_flowered-white);
+}
+.description{
+    width: var(--main-page_description-text-width);
+
+    font-family: var(--font-onest);
+    line-height: 1.3;
+    font-size: var(--main-page_description-text-size);
+    font-weight: 500;
+    text-align: center;
+
+    color: var(--color_flowered-white);
+}
+
+/* buttons classes */
+.buttonsContainer{
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: row;
+}
+.leftButtonContainer,
+.rightButtonContainer{
+    width: 50vw;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+}
+.leftButtonContainer{
+    align-items: flex-end;
+    padding-right: var(--main-page_button-container-padding);
+}
+.rightButtonContainer{
+    align-items: flex-start;
+    padding-left: var(--main-page_button-container-padding);
+}
+.buttonText{
+    width: fit-content;
+    height: fit-content;
+
+    font-family: var(--font-onest);
+    line-height: 1;
+    font-size: var(--main-page_button-text-size);
+    font-weight: 500;
+
+    color: var(--color_flowered-white);
+
+    background-color: rgba(255, 255, 255, .3);
+    border-radius: 100px;
+    padding:
+        var(--main-page_button-text-padding-topBottom)
+        var(--main-page_button-text-padding-leftRight)
+        var(--main-page_button-text-padding-topBottom)
+        var(--main-page_button-text-padding-leftRight);
+}

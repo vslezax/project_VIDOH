@@ -1,0 +1,12 @@
+.root{
+    --scale_k: calc(var(--k) / 1.2);
+
+    --container_top: calc(23 * var(--scale_k));
+    --container_gap: calc(17 * var(--scale_k));
+
+    --textButtonContainer_gap: calc(0 * var(--scale_k));
+
+    --textContainer_gap: calc(0 * var(--scale_k));
+    --title_text-size: calc(24 * var(--scale_k));
+    --subtitle_text-size: calc(14 * var(--scale_k));
+}

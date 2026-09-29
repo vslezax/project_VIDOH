@@ -1,0 +1,31 @@
+.main {
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: calc(10px * var(--scale));
+    padding:
+            calc(5px * var(--scale))
+            calc(15px * var(--scale))
+            calc(5px * var(--scale))
+            calc(15px * var(--scale));
+
+    border: calc(1.5px * var(--scale)) solid transparent;
+    border-radius: calc(100px * var(--scale));
+    background-image: linear-gradient(#000, #000), var(--gradient_hor-YP);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+.iconMap {
+    width: calc(17px * var(--scale));
+    height: calc(17px * var(--scale));
+}
+
+.text {
+    font-family: var(--font-onest);
+    font-size: calc(12px * var(--scale));
+    font-weight: 500;
+}

@@ -1,0 +1,48 @@
+.main{
+    width: 100%;
+    height: fit-content;
+}
+.container{
+    position: relative;
+    margin-top: var(--container_top);
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    width: 50%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--container_gap);
+}
+
+.textButtonContainer{
+    width: 100%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+}
+.textContainer{
+    width: 100%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--textContainer_gap);
+}
+.title{
+    font-family: var(--font-codenext);
+    line-height: 1.47;
+    font-size: var(--title_text-size);
+
+    color: var(--color_flowered-white)
+}
+.subtitle{
+    font-family: var(--font-onest);
+    line-height: 1.27;
+    font-size: var(--subtitle_text-size);
+
+    color: var(--color_secondary-white)
+}

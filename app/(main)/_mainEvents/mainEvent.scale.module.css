@@ -1,0 +1,25 @@
+.root{
+    --scale: 1;
+    --main-page_k: calc(var(--k) / 1.2 * var(--scale));
+
+    --mainEvent_content-top: calc(128 * var(--main-page_k));
+
+    --mainEvent_main-container-width: calc(580 * var(--main-page_k));
+    --mainEvent_main-container-height: calc(232 * var(--main-page_k));
+
+    --mainEvent_date-text-size: calc(9 * var(--main-page_k));
+    --mainEvent_date-padding-topBottom: calc(1.5 * var(--main-page_k));
+    --mainEvent_date-padding-leftRight: calc(14 * var(--main-page_k));
+
+    --mainEvent_infoContainer-gap: calc(8 * var(--main-page_k));
+    --mainEvent_locationContainer-gap: calc(4 * var(--main-page_k));
+    --mainEvent_location-text-size: calc(9 * var(--main-page_k));
+
+    --mainEvent_pinIcon-width: calc(9 * var(--main-page_k));
+    --mainEvent_pinIcon-height: calc(12 * var(--main-page_k));
+
+    --mainEvent_name-text-size: calc(25 * var(--main-page_k));
+    --mainEvent_name-text-width: calc(528 * var(--main-page_k));
+
+    --mainEvent_description-text-size: calc(10 * var(--main-page_k));
+}

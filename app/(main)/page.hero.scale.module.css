@@ -1,0 +1,26 @@
+.root{
+    --main-page_k: calc(var(--k) / 1.2);
+
+    --main-page_content-gap: calc(49 * var(--main-page_k));
+    --main-page_text-gap: calc(20 * var(--main-page_k));
+    --main-page_title-text-size: calc(60 * var(--main-page_k));
+    --main-page_subtitle-text-size: calc(32 * var(--main-page_k));
+    --main-page_description-text-size: calc(14 * var(--main-page_k));
+    --main-page_description-text-width: calc(516 * var(--main-page_k));
+    --main-page_button-container-padding: calc(21 * var(--main-page_k));
+    --main-page_button-text-size: calc(14 * var(--main-page_k));
+    --main-page_button-text-padding-topBottom: calc(10 * var(--main-page_k));
+    --main-page_button-text-padding-leftRight: calc(35 * var(--main-page_k));
+}
+
+@media (max-width: 1280px) {
+    .root {
+        --scale_k: calc(var(--k) / 1);
+    }
+}
+
+@media (max-width: 640px) {
+    .root {
+        --scale_k: calc(var(--k) / .5);
+    }
+}

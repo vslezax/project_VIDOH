@@ -1,0 +1,23 @@
+.root{
+    --scale_k: calc(var(--k) / 1.2);
+
+    --main_width: calc(1280 * var(--scale_k));
+    --main_height: calc(535 * var(--scale_k));
+    --main_padding-topBottom: calc(62 * var(--scale_k));
+    --main_padding-leftRight: calc(0 * var(--scale_k));
+    --main_gap: calc(23 * var(--scale_k));
+    --main_background-color: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color_purple-haze) 15%, transparent),
+        color-mix(in srgb, var(--color_purple-haze) 0%, transparent)
+        );
+
+    --mainEventsContainer-top: calc(173 * var(--scale_k));
+    --mainEventsContainer-gap: calc(55 * var(--scale_k));
+
+    --textContainer-top: calc(62 * var(--scale_k));
+    --textContainer-gap: calc(4 * var(--scale_k));
+    --textTitle_text-size: calc(56 * var(--scale_k));
+    --textTitle_drop-shadow-size: calc(5 * var(--scale_k));
+    --textSubitle_text-size: calc(20 * var(--scale_k));
+}
