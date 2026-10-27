@@ -1,4 +1,4 @@
-import styles from "./buttonToMap.module.css";
+import styles from "./Button_ListToMap.module.css";
 import IconMap from "@/public/icons/icon_Map.svg";
 
 type Props = { scaleFactor?: number };

@@ -1,7 +1,7 @@
 import React from "react";
 
-import styles from "./mainEvent.module.css";
-import scale from "./mainEvent.scale.module.css";
+import styles from "./RecommendedEventComponent.module.css";
+import scale from "./RecommendedEventComponent.scale.module.css";
 import IconPin from "@/public/icons/icon_Pin.svg";
 
 type MainEventProps = {
@@ -13,7 +13,7 @@ type MainEventProps = {
     scaleFactor?: number;
 };
 
-export default function MainEvent({
+export default function RecommendedEventComponent({
                                       date,
                                       name,
                                       description,
