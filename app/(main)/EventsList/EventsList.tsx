@@ -1,11 +1,34 @@
+import { redirect } from "next/navigation";
+
+import { EVENTS_SECTION_ID } from "@/lib/config";
+
 import events from "./EventsList.module.css";
 import eventsScale from "./EventsList.scale.module.css";
 
-import ButtonMap from "@/app/(main)/EventsList/Button_ListToMap/Button_ListToMap"
+import ButtonMap from "./Button_ListToMap/Button_ListToMap";
+import EventsGrid from "./EventsGrid";
+import { getEventsPage } from "./get-events";
 
-export default function EventsList() {
+type EventsListProps = {
+    /** Значение `?page=` при прямом заходе по ссылке; дальше страницы листаются на клиенте. */
+    pageParam?: string;
+};
+
+/**
+ * Секция «Мероприятия» на главной.
+ *
+ * Серверная часть: получить страницу для первого рендера (SSR, карточки в HTML)
+ * и отдать её клиентскому контейнеру. Переключение страниц происходит в
+ * `EventsGrid` — без навигации, изменения URL и перезагрузки страницы.
+ */
+export default async function EventsList({pageParam}: EventsListProps) {
+    const initial = await getEventsPage(pageParam);
+
+    // Номер страницы вне диапазона при прямом заходе по ссылке: уводим на первую.
+    if (initial.redirectTo) redirect(initial.redirectTo);
+
     return(
-        <div className={`${events.main} ${eventsScale.root}`}>
+        <div id={EVENTS_SECTION_ID} className={`${events.main} ${eventsScale.root}`}>
             <div className={events.container}>
                 <div className={events.textButtonContainer}>
                     <div className={events.textContainer}>
@@ -14,9 +37,8 @@ export default function EventsList() {
                     </div>
                     <ButtonMap scaleFactor={2}/>
                 </div>
-                <div className={events.eventsContainer}>
 
-                </div>
+                <EventsGrid initial={initial}/>
             </div>
         </div>
     )

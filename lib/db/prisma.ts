@@ -21,7 +21,10 @@ export const contract = contractFromJson<Contract>(contractJson);
 
 export type Db = PostgresClient<typeof contract>;
 
-type DbGlobal = typeof globalThis & { __vidohDb?: Db };
+type DbGlobal = typeof globalThis & {
+  __vidohDb?: Db;
+  __vidohDbUnchecked?: Db;
+};
 
 const globalForDb = globalThis as DbGlobal;
 
@@ -48,6 +51,23 @@ export function getPrisma(): Db {
 
   const client = createPrismaClient();
   globalForDb.__vidohDb = client;
+  return client;
+}
+
+/**
+ * Клиент для «сырых» чтений, пока контракт не описывает схему БД.
+ *
+ * Маркер контракта отключён: в базе развёрнуты 25 таблиц, а
+ * [prisma/contract.prisma](prisma/contract.prisma) пуст — `contract infer`
+ * невозможен, потому что `users.email` имеет тип `citext`, который Prisma ORM v8
+ * не описывает без пакета расширения. Как только контракт появится и база будет
+ * подписана (`npx prisma db sign`), этот клиент нужно убрать.
+ */
+export function getPrismaUnchecked(): Db {
+  if (globalForDb.__vidohDbUnchecked) return globalForDb.__vidohDbUnchecked;
+
+  const client = createPrismaClient({ verifyMarker: false });
+  globalForDb.__vidohDbUnchecked = client;
   return client;
 }
 

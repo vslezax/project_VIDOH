@@ -9,6 +9,8 @@
     "lint": "eslint",
     "postinstall": "prisma skills sync || exit 0",
     "check:infra": "tsx scripts/check-connections.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "seed:demo:clear": "tsx scripts/seed-demo.ts --clear",
     "db:emit": "prisma contract emit",
     "db:init": "prisma db init",
     "db:verify": "prisma db verify"

@@ -9,4 +9,13 @@
     --textContainer_gap: calc(0 * var(--scale_k));
     --title_text-size: calc(24 * var(--scale_k));
     --subtitle_text-size: calc(14 * var(--scale_k));
+
+    --grid_hor-gap: calc(53 * var(--k));
+    --grid_ver-gap: calc(30 * var(--k));
+
+    --empty_padding: calc(40 * var(--k));
+    --empty_text-size: calc(16 * var(--k));
+
+    /* Отступ сверху при прокрутке к началу секции «Мероприятия». */
+    --section_scroll-offset: calc(24 * var(--k));
 }

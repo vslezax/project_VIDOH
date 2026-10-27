@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" role="img" aria-label="Заглушка изображения события">
+  <defs>
+    <linearGradient id="vdh-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#988FFC" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#E0FC88" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="#1B1B1B"/>
+  <rect width="800" height="450" fill="url(#vdh-gradient)"/>
+  <circle cx="640" cy="110" r="150" fill="#1B1B1B" fill-opacity="0.25"/>
+  <circle cx="140" cy="360" r="190" fill="#1B1B1B" fill-opacity="0.25"/>
+  <text x="400" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#1B1B1B" fill-opacity="0.75">VDH</text>
+</svg>

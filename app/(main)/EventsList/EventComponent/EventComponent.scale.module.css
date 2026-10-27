@@ -1,0 +1,20 @@
+.root{
+    --scale: 1;
+    --main-page_k: calc(var(--k) / 1.2 * var(--scale));
+
+    --mainEvent_content-bottom: calc(10 * var(--main-page_k));
+
+    --mainEvent_main-container-width: calc(350 * var(--main-page_k));
+    --mainEvent_main-container-height: calc(175 * var(--main-page_k));
+
+    --mainEvent_infoContainer-gap: calc(7 * var(--main-page_k));
+    --mainEvent_locationContainer-gap: calc(5 * var(--main-page_k));
+    --mainEvent_location-text-size: calc(7 * var(--main-page_k));
+
+    --mainEvent_pinIcon-width: calc(8 * var(--main-page_k));
+    --mainEvent_pinIcon-height: calc(11 * var(--main-page_k));
+
+    --mainEvent_text-width: calc(250 * var(--main-page_k));
+    --mainEvent_name-text-size: calc(17 * var(--main-page_k));
+    --mainEvent_description-text-size: calc(11 * var(--main-page_k));
+}

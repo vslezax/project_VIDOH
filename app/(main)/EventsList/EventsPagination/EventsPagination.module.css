@@ -1,0 +1,70 @@
+.root{
+    width: 100%;
+    margin-top: var(--pagination_margin-top);
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pagination_gap);
+}
+
+.step,
+.page{
+    font-family: var(--font-onest);
+    font-size: var(--pagination_item-text-size);
+    font-weight: 500;
+    line-height: 1;
+
+    color: var(--color_flowered-white);
+
+    border: none;
+    border-radius: 100px;
+    padding:
+        var(--pagination_item-padding-topBottom)
+        var(--pagination_item-padding-leftRight);
+
+    cursor: pointer;
+}
+
+.step{
+    background-color: rgba(255, 255, 255, .12);
+}
+
+.step:hover:not(:disabled){
+    background-color: rgba(255, 255, 255, .22);
+}
+
+.page{
+    background-color: transparent;
+}
+
+.page:hover:not(:disabled){
+    background-color: rgba(255, 255, 255, .12);
+}
+
+.pageActive{
+    background: var(--gradient_hor-YP);
+    color: var(--color_black);
+    font-weight: 600;
+}
+
+.pageActive:hover:not(:disabled){
+    background: var(--gradient_hor-YP);
+}
+
+/* Крайние страницы и состояние загрузки: кнопка недоступна. */
+.step:disabled,
+.page:disabled{
+    background-color: rgba(255, 255, 255, .05);
+    color: var(--color_secondary-white);
+
+    cursor: default;
+}
+
+.ellipsis{
+    font-family: var(--font-onest);
+    font-size: var(--pagination_item-text-size);
+
+    color: var(--color_secondary-white);
+}

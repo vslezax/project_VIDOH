@@ -1,0 +1,8 @@
+.root{
+    --pagination_gap: calc(8 * var(--k));
+    --pagination_margin-top: calc(28 * var(--k));
+
+    --pagination_item-text-size: calc(13 * var(--k));
+    --pagination_item-padding-topBottom: calc(8 * var(--k));
+    --pagination_item-padding-leftRight: calc(14 * var(--k));
+}

@@ -1,0 +1,964 @@
+// =====================================================================
+// ENUM-типы
+// =====================================================================
+
+enum user_status {
+	pending
+	active
+	blocked
+	deleted
+}
+
+enum organizer_status {
+	draft
+	active
+	suspended
+	archived
+}
+
+enum organizer_legal_form {
+	individual
+	legal_entity
+}
+
+/*
+unpublished - событие не опубликовано
+published - событие опубликовано
+cancelled - событие отменено
+finished - событие завершилось
+*/
+enum event_status {
+	unpublished
+	published
+	cancelled
+	finished
+}
+
+enum media_type {
+	image
+	video
+}
+
+/*
+user_avatar - image, аватар пользователя
+event_cover - image/video, обложка мероприятия в плашке
+event_big_cover - image/video, обложка мероприятия на собственной странице
+event_gallery - image, изображения мероприятия (может быть много на одно событие)
+organizer_logo - image, логотип организатора
+organizer_cover - image, обложка организатора на собственной странице
+*/
+enum media_role {
+	user_avatar
+	event_cover
+	event_big_cover
+	event_gallery
+	organizer_logo
+	organizer_cover
+}
+
+enum link_type {
+	ticket_sale
+	website
+	social
+	stream
+	other
+}
+
+enum document_type {
+	service_rules
+	payment_rules
+	safety_rules
+	refund_policy
+	other
+}
+
+/*
+pending - ожидание рассмотрения
+published - опубликовано
+rejected - отклонено
+*/
+enum review_status {
+	pending
+	published
+	rejected
+}
+
+/*
+pending - ожидание рассмотрения
+paid - оплачено
+cancelled - отклонено
+refunded - возврат
+failed - ошибка
+*/
+enum order_status {
+	pending
+	paid
+	cancelled
+	refunded
+	failed
+}
+
+/*
+active - активен
+used - использован
+cancelled - отклонен
+refunded - возвращен
+*/
+enum ticket_status {
+	active
+	used
+	cancelled
+	refunded
+}
+
+enum promo_discount_type {
+	percent
+	fixed
+}
+
+enum schedule_kind {
+	once
+	recurring
+}
+
+enum contact_type {
+	phone
+	email
+	vk
+	telegram
+	instagram
+	website
+	other
+}
+
+enum payment_status {
+	pending
+	succeeded
+	failed
+	refunded
+	cancelled
+}
+
+// =====================================================================
+// Таблицы
+// =====================================================================
+
+Table users [headercolor: #33d636] {
+	id bigint [ pk, increment ]
+	uuid uuid [ not null, unique, note: 'Публичный идентификатор для внешних API/ссылок, не раскрывает внутренний id' ]
+	email citext [ unique, note: 'Может быть NULL, если пользователь зарегистрирован только по телефону' ]
+	phone varchar(20) [ unique, note: 'Может быть NULL, если пользователь зарегистрирован только по email' ]
+	password_hash text [ not null ]
+	name varchar(100) [ not null, note: 'Отображаемое имя; НЕ уникально — разные пользователи могут иметь одинаковое имя' ]
+	nickname varchar(150) [ not null, unique, note: 'Уникальный никнейм (логин/хэндл), по которому можно найти пользователя' ]
+	avatar_media_id bigint [ note: 'Может быть NULL; при отсутствии аватара приложение показывает изображение по умолчанию' ]
+	status user_status [ not null, default: 'pending' ]
+	email_verified_at timestamptz [ note: 'NULL = email не подтверждён' ]
+	phone_verified_at timestamptz [ note: 'NULL = телефон не подтверждён' ]
+	last_login_at timestamptz [ note: 'NULL до первого успешного входа' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+	deleted_at timestamptz [ note: 'Soft delete: NULL = активная запись; не NULL = помечена на удаление' ]
+
+	checks {
+    // Хотя бы один контакт обязателен: либо email, либо телефон должен быть заполнен — иначе нельзя связаться с пользователем и восстановить доступ
+		`email IS NOT NULL OR phone IS NOT NULL` [name: 'users_email_or_phone_required']
+	}
+
+	Note: 'email, phone, nickname и uuid уникальны. Для email используется citext, поэтому перед миграцией PostgreSQL необходимо включить расширение citext.'
+}
+
+Table event_schedules [headercolor: #2ed930] {
+	id bigint [ pk, increment, not null ]
+	event_id bigint [ not null ]
+	kind schedule_kind [ not null, note: 'once = разовое событие, recurring = повторяющееся' ]
+	start_at timestamptz [ note: 'Дата/время первого (или единственного) проведения; обязателен при kind = once' ]
+	recurrence varchar(255) [ note: 'Правило повторения (например, RRULE/ICal); обязателен при kind = recurring' ]
+	utc_offset varchar(6) [ not null, note: 'Смещение в формате +HH:MM или -HH:MM (6 символов); нужно для корректного отображения времени у зрителей в разных часовых поясах' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Для разового расписания обязателен start_at, для повторяющегося — recurrence; проверка не даёт сохранить некорректное расписание
+		`(kind = 'once' AND start_at IS NOT NULL AND recurrence IS NULL) OR (kind = 'recurring' AND recurrence IS NOT NULL)` [name: 'event_schedules_kind_fields']
+	}
+
+
+    indexes {
+        (event_id)
+        (start_at)
+    }
+
+	Note: 'Индекс (event_id) — для выборки всех расписаний события; (start_at) — для выборки ближайших событий в лентах/афише'
+}
+
+Table user_sessions [headercolor: #0af712] {
+	id bigint [ pk, increment ]
+	user_id bigint [ not null ]
+	refresh_token_hash varchar(255) [ not null, unique, note: 'Хранится хэш refresh-токена (не сам токен), unique защищает от коллизий и повторной выдачи' ]
+	user_agent varchar(255) [ note: 'UA браузера/клиента для отображения активных сессий пользователю' ]
+	ip inet [ note: 'IP-адрес сессии для аудита и подозрительной активности' ]
+	expires_at timestamptz [ not null ]
+	revoked_at timestamptz [ note: 'NULL = сессия активна; не NULL = отозвана (logout или принудительный revoke)' ]
+	created_at timestamptz [ not null ]
+
+
+    indexes {
+        (user_id)
+        (revoked_at)
+        (expires_at)
+    }
+
+	Note: 'Индексы: (user_id) — для выборки/отзыва всех сессий пользователя; (revoked_at) — для фоновой очистки истёкших/отозванных сессий'
+}
+
+Table organizers [headercolor: #6fde5b] {
+	id bigint [ pk, increment, not null ]
+	uuid uuid [ not null, unique, note: 'Публичный идентификатор организатора для внешних API' ]
+	slug varchar(160) [ not null, unique, note: 'ЧПУ для URL страницы организатора; глобально уникален' ]
+	name varchar(200) [ not null ]
+	short_description varchar(500) [ note: 'Короткое описание для карточки в списке' ]
+	description text [ note: 'Полное описание на странице организатора (markdown/HTML)' ]
+	avatar_media_id bigint [ note: 'Может быть NULL; при отсутствии аватара приложение показывает изображение по умолчанию' ]
+	cover_media_id bigint [ note: 'Может быть NULL; при отсутствии обложки приложение показывает изображение по умолчанию' ]
+	legal_form organizer_legal_form [ not null, default: 'legal_entity' ]
+	inn varchar(12) [ note: 'ИНН: 10 цифр для юрлица, 12 — для ИП/физлица; NULL для individual без регистрации' ]
+	ogrn varchar(15) [ note: 'ОГРН/ОГРНИП: 13 или 15 цифр; NULL для individual без регистрации' ]
+	status organizer_status [ not null, default: 'draft' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+	deleted_at timestamptz [ note: 'Soft delete' ]
+
+	checks {
+    // Для юрлица обязателен ИНН длиной 10 (ЮЛ) или 12 (ИП) цифр — нужно для налоговой отчётности и договоров
+		`legal_form <> 'legal_entity' OR (inn IS NOT NULL AND length(inn) IN (10, 12))` [name: 'organizers_inn_for_legal_entity']
+    // Для юрлица обязателен ОГРН (13) или ОГРНИП (15) — подтверждает регистрацию
+		`legal_form <> 'legal_entity' OR (ogrn IS NOT NULL AND length(ogrn) IN (13, 15))` [name: 'organizers_ogrn_for_legal_entity']
+	}
+
+	Note: 'slug и uuid уникальны. Для юридических реквизитов дополнительные проверки формата рекомендуется выполнять в приложении.'
+}
+
+Table countries [headercolor: #5adb56] {
+	id smallserial [ pk ]
+	name varchar(100) [ not null ]
+	iso char(2) [ not null, unique, note: 'ISO 3166-1 alpha-2 (RU, KZ, BY); unique — справочник стран не должен дублироваться' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	Note: 'Индексы: iso — UNIQUE, по нему идёт поиск страны в API/импорте'
+}
+
+Table cities [headercolor: #60db3d] {
+	id bigint [ pk, increment ]
+	country_id smallint [ not null ]
+	name varchar(150) [ not null ]
+	slug varchar(160) [ not null, note: 'ЧПУ внутри страны; уникален в паре с country_id, а не глобально (города-тёзки в разных странах)' ]
+	lat numeric(9,6) [ note: 'Широта для карты; NULL, если координаты ещё не заполнены' ]
+	lng numeric(9,6) [ note: 'Долгота для карты; NULL, если координаты ещё не заполнены' ]
+	timezone varchar(64) [ not null, default: 'UTC', note: 'IANA timezone (Europe/Moscow); нужен для корректного отображения времени событий' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+
+    indexes {
+        (country_id, slug) [unique]
+    }
+
+	Note: 'Индексы: (country_id, slug) UNIQUE — ЧПУ города уникален внутри страны; country_id также ускоряет выборку городов страны'
+}
+
+Table venues [headercolor: #4adb30] {
+	id bigint [ pk, increment ]
+	city_id bigint [ not null ]
+	slug varchar(180) [ not null, note: 'ЧПУ площадки; уникален внутри города' ]
+	name varchar(200) [ not null ]
+	address text [ not null ]
+	metro_station_id bigint [ note: 'Ближайшая станция метро (FK на справочник); NULL, если метро нет/не указано; при удалении станции — SET NULL' ]
+	lat numeric(9,6) [ note: 'Широта для карты' ]
+	lng numeric(9,6) [ note: 'Долгота для карты' ]
+	capacity integer [ note: 'Вместимость площадки; NULL = неизвестна; используется как верхняя граница при валидации capacity события' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Вместимость не может быть нулевой или отрицательной — иначе площадка бессмысленна
+		`capacity IS NULL OR capacity > 0` [name: 'venues_capacity_positive']
+    // Координаты должны быть заданы парой: либо обе, либо ни одной — иначе точка на карте будет неполной
+		`(lat IS NULL AND lng IS NULL) OR (lat IS NOT NULL AND lng IS NOT NULL)` [name: 'venues_lat_lng_pair']
+        `lat IS NULL OR lat BETWEEN -90 AND 90` [name: 'venues_lat_range']
+        `lng IS NULL OR lng BETWEEN -180 AND 180` [name: 'venues_lng_range']
+	}
+
+
+    indexes {
+        (city_id, slug) [unique]
+        (city_id)
+        (metro_station_id)
+    }
+
+	Note: 'Индексы: (city_id, slug) UNIQUE — ЧПУ площадки уникален внутри города; city_id ускоряет выборку площадок города'
+}
+
+Table categories [headercolor: #55db46] {
+	id bigint [ pk, increment ]
+	slug varchar(160) [ not null, unique, note: 'ЧПУ категории; глобально уникален' ]
+	name varchar(150) [ not null ]
+	description text [ note: 'Описание для SEO/подсказок' ]
+	icon_media_id bigint [ note: 'Может быть NULL; при отсутствии иконки приложение показывает изображение по умолчанию' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода в списках/фильтрах; меньшее значение — выше' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+	deleted_at timestamptz [ note: 'Soft delete' ]
+
+
+    indexes {
+        (sort_order)
+    }
+
+	Note: 'Индексы: slug — UNIQUE для URL/фильтров; sort_order — для сортировки в UI'
+}
+
+Table media [headercolor: #4ce843] {
+	id bigint [ pk, increment ]
+	storage_key text [ not null, unique, note: 'Ключ объекта в S3/хранилище; unique защищает от перезаписи чужого файла' ]
+	url text [ not null, note: 'Публичный URL (CDN) для отдачи' ]
+	type media_type [ not null ]
+	alt varchar(255) [ note: 'Alt-текст для доступности (screen readers) и SEO; NULL, если не задан' ]
+	width integer [ note: 'Ширина в px; NULL для видео без метаданных' ]
+	height integer [ note: 'Высота в px; NULL для видео без метаданных' ]
+	size_bytes bigint [ note: 'Размер файла в байтах; NULL, если неизвестен' ]
+	uploaded_by bigint [ note: 'NULL, если пользователь-загрузчик удалён или файл загружен системным процессом' ]
+	created_at timestamptz [ not null ]
+
+	checks {
+    // Ширина не может быть нулевой/отрицательной — иначе битые пропорции'
+		`width IS NULL OR width > 0` [name: 'media_width_positive']
+    // Высота не может быть нулевой/отрицательной — иначе битые пропорции
+		`height IS NULL OR height > 0` [name: 'media_height_positive']
+    // Размер файла не может быть отрицательным
+		`size_bytes IS NULL OR size_bytes >= 0` [name: 'media_size_nonnegative']
+	}
+
+
+    indexes {
+        (uploaded_by)
+    }
+
+	Note: 'Индексы: storage_key UNIQUE — защита от коллизий объектов; (uploaded_by) — для аудита и удаления медиа пользователя'
+}
+
+Table event_media [headercolor: #3bf507] {
+	event_id bigint [ not null ]
+	media_id bigint [ not null ]
+	role media_role [ not null, default: 'event_cover', note: 'Роль медиа: обложка, большая обложка или элемент галереи' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок в галерее; меньшее значение — раньше' ]
+	caption varchar(255) [ note: 'Подпись под изображением в галерее; NULL, если не нужна' ]
+
+  indexes {
+		(event_id, media_id) [ pk ]
+        (media_id)
+	}
+
+	checks {
+    // Для элементов галереи порядок не может быть отрицательным — иначе неоднозначная сортировка
+		`role NOT IN ('event_gallery') OR sort_order >= 0` [name: 'event_media_gallery_sort_nonnegative']
+	}
+
+	Note: 'PK (event_id, media_id) — одна и та же медиа-запись не может дважды участвовать в одном событии. Частичный UNIQUE-индекс UNIQUE(event_id, role) WHERE role IN (event_cover, event_big_cover) должен быть реализован в миграции — в DBML нет нативного синтаксиса частичных индексов; он гарантирует не более одной обложки/большой обложки на событие, но НЕ ограничивает количество event_gallery. Индекс (media_id) — для удаления/замены медиа и поиска всех использований'
+}
+
+Table events [headercolor: #12ff05] {
+	id bigint [ pk, increment ]
+	uuid uuid [ not null, unique, note: 'Публичный идентификатор события для внешних API/ссылок' ]
+	slug varchar(200) [ not null, unique, note: 'ЧПУ события для URL; глобально уникален' ]
+	title varchar(255) [ not null ]
+	short_description varchar(500) [ note: 'Краткое описание для карточки/плашки' ]
+	description text [ note: 'Полное описание на странице события' ]
+	venue_id bigint [ note: 'Площадка; NULL для онлайн-событий; при удалении площадки — SET NULL' ]
+	online_url text [ note: 'Ссылка на трансляцию/онлайн-площадку; NULL для офлайн-событий' ]
+	status event_status [ not null, default: 'unpublished' ]
+	age_rating smallint [ note: 'Возрастной рейтинг: 0, 6, 12, 16, 18; NULL = не указан' ]
+	capacity integer [ note: 'Вместимость события (общая); NULL = не ограничена/неизвестна; верхняя граница для tickets_count' ]
+	currency char(3) [ not null, default: 'RUB', note: 'ISO 4217 (RUB, USD, KZT); валюта цен события' ]
+	published_at timestamptz [ note: 'Момент публикации; NULL пока не опубликовано; используется в сортировке афиши' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+	deleted_at timestamptz [ note: 'Soft delete' ]
+
+	checks {
+    // Должна быть указана площадка или онлайн-ссылка; допускается гибридное событие с обоими полями
+		`venue_id IS NOT NULL OR online_url IS NOT NULL` [name: 'events_venue_or_online']
+    // Допустимы только стандартные возрастные рейтинги РФ — иначе UI/фильтры сломаются
+		`age_rating IS NULL OR age_rating IN (0, 6, 12, 16, 18)` [name: 'events_age_rating_allowed']
+    // Вместимость не может быть нулевой/отрицательной
+		`capacity IS NULL OR capacity > 0` [name: 'events_capacity_positive']
+    // Опубликованное событие обязано иметь published_at — иначе сортировка афиши и кэш дадут неверный порядок
+		`status <> 'published' OR published_at IS NOT NULL` [name: 'events_published_requires_published_at']
+	}
+
+
+    indexes {
+        (status, published_at)
+        (venue_id)
+        (deleted_at)
+    }
+
+	Note: 'Индексы: uuid/slug — UNIQUE для внешних ссылок/URL; (status, published_at) — для афиши (только опубликованные, сортировка по дате); (venue_id) — для выборки событий площадки; (deleted_at) для фильтрации soft-deleted'
+}
+
+Table event_organizers [headercolor: #5aed28] {
+	event_id bigint [ not null ]
+	organizer_id bigint [ not null ]
+	is_primary boolean [ not null, default: false, note: 'Главный организатор события; ровно один на событие' ]
+	role varchar(100) [ note: 'Текстовая роль соорганизатора (партнёр, продюсер и т.п.); NULL для основного' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода соорганизаторов; меньшее — раньше' ]
+	confirmed_at timestamptz [ note: 'Когда организатор подтвердил участие; NULL = ещё не подтвердил' ]
+
+  indexes {
+		(event_id, organizer_id) [ pk ]
+        (organizer_id)
+  }
+
+	checks {
+    // Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'event_organizers_sort_nonnegative']
+	}
+
+	Note: 'PK (event_id, organizer_id) запрещает дубли организатора. Частичный уникальный индекс допускает не более одного главного организатора; индекс organizer_id ускоряет поиск событий организатора. Требуется отдельная миграция для частичного индекса.'
+}
+
+Table event_categories [headercolor: #35db35] {
+	event_id bigint [ not null ]
+	category_id bigint [ not null ]
+	is_primary boolean [ not null, default: false, note: 'Главная категория события; ровно одна на событие' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода категорий; меньшее — раньше' ]
+
+  indexes {
+		(event_id, category_id) [ pk ]
+        (category_id)
+	}
+
+	checks {
+    // Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'event_categories_sort_nonnegative']
+	}
+
+	Note: 'PK (event_id, category_id) запрещает дубли категорий. Частичный уникальный индекс допускает не более одной главной категории; индекс category_id ускоряет поиск событий по категории. Требуется отдельная миграция для частичного индекса.'
+}
+
+Table event_links [headercolor: #0dfa05] {
+	id bigint [ pk, increment ]
+	event_id bigint [ not null ]
+	type link_type [ not null, note: 'Назначение ссылки: продажа билетов, сайт, соцсеть, трансляция, прочее' ]
+	url text [ not null ]
+	title varchar(150) [ note: 'Человекочитаемая подпись ссылки; NULL — показывать сам URL' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода ссылок; меньшее — раньше' ]
+
+	checks {
+    // Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'event_links_sort_nonnegative']
+	}
+
+
+    indexes {
+        (event_id)
+    }
+
+	Note: 'Индекс (event_id) — для выборки всех ссылок события'
+}
+
+Table tickets [headercolor: #4ce332] {
+	id bigint [ pk, increment ]
+	event_id bigint [ not null ]
+	name varchar(150) [ not null ]
+	description text [ note: 'Описание категории билета (что входит, условия)' ]
+	price numeric(12,2) [ not null, default: 0, note: 'Цена; 0 = бесплатный билет' ]
+	currency char(3) [ not null, default: 'RUB', note: 'ISO 4217; должна совпадать с events.currency (проверка на уровне приложения)' ]
+	tickets_count integer [ note: 'Лимит билетов данной категории; NULL = без лимита (ограничен только capacity события)' ]
+	sold_count integer [ not null, default: 0, note: 'Сколько уже продано; инкрементируется атомарно при оплате' ]
+	external_url text [ note: 'Внешняя ссылка на продажу (если билеты продаются не у нас); NULL для внутренней продажи' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода категорий билетов; меньшее — раньше' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Цена не может быть отрицательной
+		`price >= 0` [name: 'tickets_price_nonnegative']
+    // Лимит либо NULL (без лимита), либо положительный — нулевой лимит бессмысленен
+		`tickets_count IS NULL OR tickets_count > 0` [name: 'tickets_count_positive']
+    // Проданное количество не может быть отрицательным
+		`sold_count >= 0` [name: 'tickets_sold_nonnegative']
+    // Нельзя продать больше, чем лимит категории
+		`tickets_count IS NULL OR sold_count <= tickets_count` [name: 'tickets_sold_le_count']
+    // Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'tickets_sort_nonnegative']
+	}
+
+
+    indexes {
+        (event_id)
+    }
+
+	Note: 'Индекс (event_id) — для выборки всех категорий билетов события'
+}
+
+Table promo_codes [headercolor: #175e7a] {
+	id bigint [ pk, increment ]
+	code varchar(64) [ not null, unique, note: 'Сам промокод; глобально уникален, регистронезависимость — на уровне приложения' ]
+	event_id bigint [ note: 'NULL = глобальный промокод на все события; иначе — только на указанное событие' ]
+	discount_type promo_discount_type [ not null ]
+	discount_value numeric(12,2) [ not null, note: 'Процент (0–100) при percent, сумма в currency при fixed' ]
+	max_uses integer [ note: 'Лимит использований; NULL = без лимита' ]
+	used_count integer [ not null, default: 0, note: 'Сколько раз уже применён; инкрементируется атомарно' ]
+	valid_from timestamptz [ note: 'Начало действия; NULL = без ограничения снизу' ]
+	valid_to timestamptz [ note: 'Конец действия; NULL = без ограничения сверху' ]
+	is_active boolean [ not null, default: true, note: 'Ручное включение/выключение без удаления' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Процентная скидка должна быть в диапазоне (0; 100] — иначе скидка бессмысленна или превышает цену
+		`discount_type <> 'percent' OR (discount_value > 0 AND discount_value <= 100)` [name: 'promo_percent_range']
+    // Фиксированная скидка должна быть положительной
+		`discount_type <> 'fixed' OR discount_value > 0` [name: 'promo_fixed_positive']
+    // Лимит либо NULL, либо положительный
+		`max_uses IS NULL OR max_uses > 0` [name: 'promo_max_uses_positive']
+    // Счётчик использований не может быть отрицательным
+		`used_count >= 0` [name: 'promo_used_nonnegative']
+    // Нельзя применить промокод больше лимита
+		`max_uses IS NULL OR used_count <= max_uses` [name: 'promo_used_le_max']
+    // Дата начала должна быть раньше даты окончания — иначе промокод никогда не сработает
+		`valid_from IS NULL OR valid_to IS NULL OR valid_from < valid_to` [name: 'promo_valid_range']
+	}
+
+
+    indexes {
+        (event_id)
+        (is_active, valid_to)
+    }
+
+	Note: 'Индексы: code UNIQUE — быстрый поиск и защита от дублей; (event_id) — для выборки промокодов события; (is_active, valid_to) — для валидации при оформлении заказа'
+}
+
+Table user_favorites [headercolor: #46e031] {
+	user_id bigint [ not null ]
+	event_id bigint [ not null ]
+	created_at timestamptz [ not null ]
+
+  indexes {
+		(user_id, event_id) [ pk ]
+        (event_id)
+	}
+
+	Note: 'Составной PK (user_id, event_id) предотвращает повторное добавление события пользователем; отдельный индекс event_id ускоряет поиск пользователей, добавивших событие в избранное.'
+}
+
+Table event_reviews [headercolor: #32e82c] {
+	id bigint [ pk, increment ]
+	event_id bigint [ not null ]
+	user_id bigint [ not null ]
+	rating smallint [ not null, note: 'Оценка 1–5' ]
+	text text [ note: 'Текст отзыва; NULL = только оценка' ]
+	status review_status [ not null, default: 'published' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Оценка должна быть от 1 до 5 — иначе средний рейтинг и звёзды в UI будут некорректны
+		`rating BETWEEN 1 AND 5` [name: 'event_reviews_rating_range']
+	}
+
+
+    indexes {
+        (event_id, user_id) [unique]
+        (event_id, status)
+        (user_id)
+    }
+
+	Note: 'UNIQUE (event_id, user_id) — один отзыв на событие от пользователя; (event_id, status) — для выборки опубликованных отзывов события; (user_id) — для «мои отзывы»'
+}
+
+Table orders [headercolor: #175e7a] {
+	id bigint [ pk, increment ]
+	uuid uuid [ not null, unique, note: 'Публичный идентификатор заказа для внешних ссылок/чеков' ]
+	user_id bigint [ not null ]
+	event_id bigint [ not null ]
+	status order_status [ not null, default: 'pending' ]
+	total_amount numeric(12,2) [ not null, default: 0, note: 'Итог с учётом промокода; 0 для бесплатных заказов' ]
+	currency char(3) [ not null, default: 'RUB', note: 'ISO 4217; должна совпадать с валютой события' ]
+	promo_code_id bigint [ note: 'Применённый промокод; NULL если не применялся; при удалении промокода — SET NULL' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+	paid_at timestamptz [ note: 'Когда оплачен; NULL пока не оплачен' ]
+	cancelled_at timestamptz [ note: 'Когда отменён; NULL пока не отменён' ]
+
+	checks {
+    // Сумма заказа не может быть отрицательной
+		`total_amount >= 0` [name: 'orders_total_nonnegative']
+    // Оплаченный заказ обязан иметь paid_at — иначе аудит/отчёты по оплатам будут неполными
+		`status <> 'paid' OR paid_at IS NOT NULL` [name: 'orders_paid_requires_paid_at']
+    // Отменённый заказ обязан иметь cancelled_at
+		`status <> 'cancelled' OR cancelled_at IS NOT NULL` [name: 'orders_cancelled_requires_cancelled_at']
+	}
+
+
+    indexes {
+        (user_id, status)
+        (event_id)
+        (status, created_at)
+    }
+
+	Note: 'Индексы: uuid UNIQUE — внешние ссылки; (user_id, status) — «мои заказы» по статусу; (event_id) — отчёты по событию; (status, created_at) — админская очередь обработки заказов'
+}
+
+Table order_items [headercolor: #175e7a] {
+	id bigint [ pk, increment ]
+	order_id bigint [ not null ]
+	ticket_id bigint [ not null ]
+	quantity smallint [ not null, note: 'Количество билетов данной категории в заказе' ]
+	unit_price numeric(12,2) [ not null, note: 'Цена за единицу на момент оформления' ]
+	total_price numeric(12,2) [ not null, note: 'Должна равняться quantity * unit_price; скидка на строку этой схемой пока не поддерживается' ]
+	event_title_snapshot varchar(255) [ note: 'Снимок названия события на момент заказа — чтобы история не менялась при переименовании' ]
+	ticket_name_snapshot varchar(150) [ note: 'Снимок названия категории билета на момент заказа' ]
+
+	checks {
+    // Нельзя заказать 0 или отрицательное число билетов
+		`quantity > 0` [name: 'order_items_quantity_positive']
+    // Цена не может быть отрицательной
+		`unit_price >= 0` [name: 'order_items_unit_price_nonnegative']
+    // Сумма строки не может быть отрицательной
+		`total_price >= 0` [name: 'order_items_total_price_nonnegative']
+    // Сумма строки должна равняться quantity * unit_price — иначе расхождения в чеках и отчётах
+		`total_price = quantity * unit_price` [name: 'order_items_total_matches']
+	}
+
+
+    indexes {
+        (order_id)
+        (ticket_id)
+    }
+
+	Note: 'Индексы: (order_id) — для выборки позиций заказа; (ticket_id) — для отчётов по проданным категориям и каскадных проверок'
+}
+
+Table issued_tickets [headercolor: #d4ed2d] {
+	id bigint [ pk, increment ]
+	uuid uuid [ not null, unique, note: 'Публичный идентификатор билета (для QR/ссылки)' ]
+	order_item_id bigint [ not null ]
+	user_id bigint [ not null ]
+	event_id bigint [ not null ]
+	code varchar(64) [ not null, unique, note: 'Код для чек-ина (QR); unique защищает от подделки/дублей' ]
+	status ticket_status [ not null, default: 'active' ]
+	checked_in_at timestamptz [ note: 'Когда прошёл чек-ин; NULL = ещё не использован' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Использованный билет обязан иметь checked_in_at — иначе нельзя отличить «used» от ошибочного статуса
+		`status <> 'used' OR checked_in_at IS NOT NULL` [name: 'issued_tickets_used_requires_checkin']
+	}
+
+
+    indexes {
+        (user_id, status)
+        (event_id)
+        (order_item_id)
+    }
+
+	Note: 'Индексы: uuid/code UNIQUE — поиск и защита от дублей; (user_id, status) — «мои билеты»; (event_id) — чек-ин на входе; (order_item_id) — связь с позицией заказа'
+}
+
+Table payments [headercolor: #175e7a] {
+	id bigint [ pk, increment ]
+	order_id bigint [ not null ]
+	provider varchar(50) [ not null, note: 'Платёжный провайдер (yookassa, tinkoff, stripe и т.п.)' ]
+	provider_txn varchar(150) [ note: 'ID транзакции у провайдера; NULL до получения ответа; UNIQUE(provider, provider_txn) реализуется частичным индексом WHERE provider_txn IS NOT NULL' ]
+	idempotency_key varchar(150) [ note: 'Ключ идемпотентности от клиента; NULL если не передан; UNIQUE(provider, idempotency_key) — частичный индекс WHERE idempotency_key IS NOT NULL' ]
+	amount numeric(12,2) [ not null, note: 'Сумма платежа; должна совпадать с orders.total_amount (проверка на уровне приложения)' ]
+	currency char(3) [ not null, note: 'ISO 4217; должна совпадать с валютой заказа' ]
+	status payment_status [ not null, default: 'pending' ]
+	raw_payload jsonb [ note: 'Сырой ответ провайдера для аудита и разбора спорных случаев' ]
+	created_at timestamptz [ not null ]
+
+	checks {
+    // Сумма платежа не может быть отрицательной
+		`amount >= 0` [name: 'payments_amount_nonnegative']
+	}
+
+
+    indexes {
+        (order_id)
+        (status)
+    }
+
+	Note: 'Индексы: (order_id) — все попытки оплаты по заказу; частичные UNIQUE (provider, provider_txn) WHERE provider_txn IS NOT NULL и (provider, idempotency_key) WHERE idempotency_key IS NOT NULL — защита от дублей платежей (реализуются в миграции); (status) — для мониторинга зависших платежей'
+}
+
+Table event_documents [headercolor: #cee825] {
+	id bigint [ pk, increment ]
+	event_id bigint [ not null ]
+	type document_type [ not null, note: 'Тип документа: правила сервиса, оплаты, безопасности, возврата, прочее' ]
+	title varchar(255) [ not null ]
+	content text [ note: 'Текст документа (markdown); NULL если документ задан только ссылкой' ]
+	url text [ note: 'Ссылка на внешний документ; NULL если документ задан текстом' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода документов; меньшее — раньше' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+
+	checks {
+    // Документ должен иметь либо текст, либо ссылку — иначе он пустой
+		`content IS NOT NULL OR url IS NOT NULL` [name: 'event_documents_content_or_url']
+    // Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'event_documents_sort_nonnegative']
+	}
+
+
+    indexes {
+        (event_id)
+    }
+
+	Note: 'Индекс (event_id) — для выборки документов события'
+}
+
+Table organizer_contacts [headercolor: #67f257] {
+	id bigint [ pk, increment ]
+	organizer_id bigint [ not null ]
+	type contact_type [ not null, note: 'Канал связи: телефон, email, соцсеть, сайт, прочее' ]
+	value varchar(255) [ not null, note: 'Значение контакта (номер, адрес, URL, @username)' ]
+	is_shown boolean [ not null, default: true, note: 'Показывать ли контакт на публичной странице организатора' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода контактов; меньшее — раньше' ]
+	created_at timestamptz [ not null ]
+
+	checks {
+    // Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'organizer_contacts_sort_nonnegative']
+	}
+
+
+    indexes {
+        (organizer_id, type)
+        (organizer_id, type, value) [unique]
+    }
+
+	Note: 'Индекс (organizer_id, type) — для выборки контактов организатора по типу; UNIQUE (organizer_id, type, value) реализуется в миграции — защита от дублей одного и того же контакта'
+}
+
+Table metro_stations [headercolor: #d63a2f] {
+	id bigint [ pk, increment ]
+	city_id bigint [ not null, note: 'Город, к которому относится станция; справочник станций привязан к городу' ]
+	name varchar(150) [ not null, note: 'Название станции (например, «Парк культуры»); уникально в рамках города' ]
+	line_name varchar(150) [ not null, note: 'Название ветки/линии (например, «Сокольническая»); для группировки и фильтра по ветке' ]
+	line_color char(7) [ note: 'HEX-цвет ветки (#RRGGBB) для UI; NULL = цвет не задан, берётся дефолтный' ]
+	line_icon_media_id bigint [ note: 'Иконка/логотип ветки метро; N станций одной ветки ссылаются на одну и ту же медиа-запись (N×1 к media); NULL = иконки нет, UI показывает дефолт' ]
+	sort_order integer [ not null, default: 0, note: 'Порядок вывода станций/веток в списках; меньшее — выше' ]
+	created_at timestamptz [ not null ]
+	updated_at timestamptz [ not null ]
+	deleted_at timestamptz [ note: 'Soft delete: NULL = активная запись' ]
+
+	checks {
+		// HEX-цвет должен быть в формате #RRGGBB — иначе UI не сможет его отрисовать
+		`line_color IS NULL OR line_color ~ '^#[0-9A-Fa-f]{6}$'` [name: 'metro_stations_line_color_hex']
+		// Отрицательный порядок сортировки неоднозначен
+		`sort_order >= 0` [name: 'metro_stations_sort_nonnegative']
+	}
+
+	indexes {
+		(city_id, name) [unique]
+		(city_id)
+		(line_name)
+		(line_icon_media_id)
+		(deleted_at)
+	}
+
+	Note: 'UNIQUE (city_id, name) — станция уникальна в рамках города. Индекс (city_id) — выборка станций города для автокомплита; (line_name) — фильтр «показать только эту ветку»; (line_icon_media_id) — поиск всех станций, использующих иконку ветки (для замены/удаления медиа). Связь N×1 к media: многие станции одной ветки ссылаются на одну иконку line_icon_media_id.'
+}
+
+// =====================================================================
+// Связи (Ref)
+// =====================================================================
+
+Ref fk_media_id_users {
+	media.id < users.avatar_media_id [ delete: set null, update: no action ]
+}
+
+Ref fk_users_id_user_sessions {
+	users.id < user_sessions.user_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_media_id_organizers_avatar {
+	media.id < organizers.avatar_media_id [ delete: set null, update: no action ]
+}
+
+Ref fk_countries_id_cities {
+	countries.id < cities.country_id [ delete: no action, update: no action ]
+}
+
+Ref fk_cities_id_venues {
+	cities.id < venues.city_id [ delete: no action, update: no action ]
+}
+
+Ref fk_media_id_categories {
+	media.id < categories.icon_media_id [ delete: set null, update: no action ]
+}
+
+Ref fk_events_id_event_media {
+	events.id < event_media.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_media_id_event_media {
+	media.id < event_media.media_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_venues_id_events {
+	venues.id < events.venue_id [ delete: set null, update: no action ]
+}
+
+Ref fk_events_id_event_organizers {
+	events.id < event_organizers.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_organizers_id_event_organizers {
+	organizers.id < event_organizers.organizer_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_event_categories {
+	events.id < event_categories.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_categories_id_event_categories {
+	categories.id < event_categories.category_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_event_links {
+	events.id < event_links.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_tickets {
+	events.id < tickets.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_promo_codes {
+	events.id < promo_codes.event_id [ delete: set null, update: no action ]
+}
+
+Ref fk_users_id_user_favorites {
+	users.id < user_favorites.user_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_user_favorites {
+	events.id < user_favorites.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_event_reviews {
+	events.id < event_reviews.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_users_id_event_reviews {
+	users.id < event_reviews.user_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_users_id_orders {
+	users.id < orders.user_id [ delete: no action, update: no action ]
+}
+
+Ref fk_events_id_orders {
+	events.id < orders.event_id [ delete: no action, update: no action ]
+}
+
+Ref fk_promo_codes_id_orders {
+	promo_codes.id < orders.promo_code_id [ delete: set null, update: no action ]
+}
+
+Ref fk_orders_id_order_items {
+	orders.id < order_items.order_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_tickets_id_order_items {
+	tickets.id < order_items.ticket_id [ delete: no action, update: no action ]
+}
+
+Ref fk_order_items_id_issued_tickets {
+	order_items.id < issued_tickets.order_item_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_users_id_issued_tickets {
+	users.id < issued_tickets.user_id [ delete: no action, update: no action ]
+}
+
+Ref fk_events_id_issued_tickets {
+	events.id < issued_tickets.event_id [ delete: no action, update: no action ]
+}
+
+Ref fk_orders_id_payments {
+	orders.id < payments.order_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_event_schedules {
+	events.id < event_schedules.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_events_id_event_documents {
+	events.id < event_documents.event_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_media_id_organizers_cover {
+	media.id < organizers.cover_media_id [ delete: set null, update: no action ]
+}
+
+Ref fk_organizers_id_organizer_contacts {
+	organizers.id < organizer_contacts.organizer_id [ delete: cascade, update: no action ]
+}
+
+Ref fk_users_id_media {
+	users.id < media.uploaded_by [ delete: set null, update: no action ]
+}
+
+Ref fk_cities_id_metro_stations {
+	cities.id < metro_stations.city_id [ delete: no action, update: no action ]
+}
+
+Ref fk_media_id_metro_stations_line_icon {
+	media.id < metro_stations.line_icon_media_id [ delete: set null, update: no action ]
+}
+
+Ref fk_metro_stations_id_venues {
+	metro_stations.id < venues.metro_station_id [ delete: set null, update: no action ]
+}
+
+// =====================================================================
+// ВАЖНО: дополнительные PostgreSQL-миграции
+// =====================================================================
+// DBML не описывает частичные индексы универсальным переносимым синтаксисом.
+// Создай эти индексы отдельной SQL-миграцией после генерации основной схемы:
+//
+// CREATE UNIQUE INDEX event_media_one_cover_per_role
+//   ON event_media (event_id, role)
+//   WHERE role IN ('event_cover', 'event_big_cover');
+//
+// CREATE UNIQUE INDEX event_organizers_one_primary
+//   ON event_organizers (event_id) WHERE is_primary = TRUE;
+//
+// CREATE UNIQUE INDEX event_categories_one_primary
+//   ON event_categories (event_id) WHERE is_primary = TRUE;
+//
+// CREATE UNIQUE INDEX payments_provider_txn_unique
+//   ON payments (provider, provider_txn) WHERE provider_txn IS NOT NULL;
+//
+// CREATE UNIQUE INDEX payments_idempotency_key_unique
+//   ON payments (provider, idempotency_key) WHERE idempotency_key IS NOT NULL;
+//
+// Если промокоды должны быть регистронезависимыми, добавь отдельную миграцию
+// с UNIQUE INDEX promo_codes_code_ci_unique ON promo_codes (lower(code));
+// Перед её созданием проверь и устрани существующие дубли без учёта регистра.
+//
+// Межтабличные правила (например, совпадение event_id в orders, tickets и
+// issued_tickets) требуют проверки приложением либо специальных триггеров.
+//
+// Метро: станция уникальна в рамках города (без учёта регистра — на уровне приложения)
+// В DBML UNIQUE (city_id, name) уже есть; при необходимости регистронезависимости:
+// CREATE UNIQUE INDEX metro_stations_city_name_ci_unique ON metro_stations (city_id, lower(name));
+//
+// Иконка ветки должна быть именно image и ролью metro_line_icon —
+// проверка на уровне приложения (media.type = 'image' AND media_role = 'metro_line_icon'),
+// т.к. media не привязана к роли в самой таблице (роль задаётся контекстом использования).

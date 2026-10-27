@@ -1,6 +1,9 @@
 .main{
     width: 100%;
     height: fit-content;
+
+    /* Отступ при прокрутке к секции: заголовок не прилипает к верху окна. */
+    scroll-margin-top: var(--section_scroll-offset);
 }
 .container{
     position: relative;
@@ -45,4 +48,39 @@
     font-size: var(--subtitle_text-size);
 
     color: var(--color_secondary-white)
+}
+
+.eventsContainer{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Ряды по содержимому: карточек может быть меньше или больше, чем 2 ряда. */
+    grid-template-rows: auto;
+    gap: var(--grid_ver-gap) var(--grid_hor-gap);
+}
+
+/* Пока грузится следующая страница: мягко приглушаем сетку, не дёргая layout. */
+.eventsContainerPending{
+    opacity: .55;
+    transition: opacity .15s ease-out;
+}
+
+/* Обёртка-ссылка на карточку: всю площадь карточки делает кликабельной. */
+.cardLink{
+    display: block;
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.emptyState{
+    width: 100%;
+    padding: var(--empty_padding) 0;
+
+    font-family: var(--font-onest);
+    font-size: var(--empty_text-size);
+    line-height: 1.3;
+    text-align: center;
+
+    color: var(--color_secondary-white);
 }

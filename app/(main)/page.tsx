@@ -4,7 +4,16 @@ import heroScale from "./page.hero.scale.module.css";
 import RecommendedEvents from "./RecommendedEvents/RecommendedEvents";
 import EventsList from "./EventsList/EventsList";
 
-export default function Home() {
+type HomeProps = {
+  /** Next 16: searchParams — Promise, читается внутри async-компонента. */
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams;
+  // Секции «Мероприятия» нужен только номер страницы; всё остальное игнорируем.
+  const pageParam = typeof params.page === "string" ? params.page : undefined;
+
   return (
     <main className={`flex flex-col`}>
       <div className={`${hero.main} ${heroScale.root}`}>
@@ -28,7 +37,7 @@ export default function Home() {
       </div>
 
       <RecommendedEvents/>
-      <EventsList/>
+      <EventsList pageParam={pageParam}/>
     </main>
   );
 }
