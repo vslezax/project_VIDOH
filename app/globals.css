@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@media (min-width: 320px) and (max-width: 768px){
+  :root{
+    --design-width: 320;
+  }
+}
+
 :root {
   --design-width: 1280;
   --k: calc(100vw / var(--design-width));
