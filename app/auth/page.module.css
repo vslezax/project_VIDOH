@@ -1,0 +1,196 @@
+.main{
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--main_background-color);
+}
+.container{
+    position: absolute;
+    z-index: 1;
+    width: var(--container_width);
+    height: var(--container_height);
+
+    background-color: var(--color_flowered-white);
+    border-radius: var(--container_border-radius);
+}
+.content{
+    position: absolute;
+
+    width: var(--content_width);
+    height: var(--content_height);
+
+    top: var(--content_top);
+    left: var(--content_left);
+
+    transform: translateY(-50%);
+}
+.BackgroundVideo{
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    mix-blend-mode: plus-lighter;
+}
+.shader{
+    width: var(--shader_width);
+    height: var(--shader_height);
+
+    position: absolute;
+    top: 50%;
+    left: var(--shader_left);
+    transform: translateY(-50%);
+
+    overflow: hidden;
+
+    border-radius: var(--shader_border-radius);
+}
+
+
+.logo{
+    width: var(--logo_width);
+    height: var(--logo_height);
+}
+.logo path{
+    fill: currentColor;
+}
+.line{
+    position: absolute;
+
+    width: var(--line_width);
+    height: var(--line_height);
+
+    left: var(--line_left);
+    top: var(--line_top);
+
+    background-color: var(--color_black-graphite);
+    opacity: .1;
+}
+.EmailPasswordContainer{
+    position: absolute;
+
+    width: 100%;
+    height: fit-content;
+
+    top: var(--EmailPasswordContainer_top);
+    left: var(--EmailPasswordContainer_left);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--EmailPasswordContainer_gap);
+}
+.EmailPasswordLowContainer{
+    width: 100%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--EmailPasswordLowContainer_gap);
+}
+.EmailPasswordTextBox{
+    width: 100%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    padding: var(--EmailPasswordTextBox_padding);
+
+    border-radius: var(--EmailPasswordTextBox_border-radius);
+    border: solid var(--EmailPasswordTextBox_border-color) var(--EmailPasswordTextBox_border-size);
+}
+.AlreadyHaveAccountContainer{
+    position: absolute;
+    width: 100%;
+    top: var(--AlreadyHaveAccountContainer_top);
+    left: 0;
+    transform: none;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--AlreadyHaveAccountContainer_gap);
+    opacity: .6;
+}
+.RegLoginButtonContainer{
+    position: absolute;
+
+    width: 100%;
+    height: fit-content;
+
+    top: var(--RegButtonContainer_top);
+    left: var(--RegButtonContainer_left);
+    transform: translateX(-50%);
+
+    display: flex;
+    flex-direction: column;
+    padding: var(--RegButtonContainer_padding);
+
+    background-color: var(--RegButtonContainer_background-color);
+    border-radius: var(--RegButtonContainer_border-radius);
+}
+
+.title,
+.subtitle,
+.AlreadyHaveAccount,
+.SignInUpButton,
+.EmailPasswordTitle,
+.EmailPasswordTextBoxText,
+.ShaderText{
+    font-family: var(--font-onest);
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--color_black-graphite);
+}
+.RegLoginButtonText{
+    font-family: var(--font-onest);
+    line-height: 1.2;
+    font-weight: 500;
+    font-size: var(--RegButtonText_text-size);
+    color: var(--RegButtonText_text-color);
+}
+.title{
+    position: absolute;
+    top: var(--title_top);
+    left: var(--title_left);
+    font-size: var(--title_text-size);
+}
+.subtitle{
+    position: absolute;
+    top: var(--subtitle_top);
+    font-size: var(--subtitle_text-size);
+}
+.AlreadyHaveAccount,
+.SignInUpButton{
+    font-size: var(--AlreadyHaveAccount_text-size);
+    font-weight: 300;
+}
+.EmailPasswordTitle{font-size: var(--EmailPasswordTitle_text-size);}
+.EmailPasswordTextBoxText{
+    width: var(--EmailPasswordTextBoxText_text-width);
+    height: fit-content;
+
+    font-size: var(--EmailPasswordTextBoxText_text-size);
+    opacity: .3;
+}
+.ShaderText{
+    position: absolute;
+    left: var(--ShaderText_left);
+    top: var(--ShaderText_top);
+
+    width: var(--ShaderText_width);
+
+    font-size: var(--ShaderText_text-size);
+    color: var(--color_flowered-white);
+    opacity: 1.0;
+}

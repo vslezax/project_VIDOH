@@ -1,0 +1,162 @@
+/* =====================================================================
+ * Анимация перехода «Регистрация» ⇄ «Авторизация».
+ * Длительности задаются в authAnimation.tsx (EraseTime / GrowUpTime),
+ * а прогресс приходит инлайново как CSS-переменные:
+ *   --auth_timeline  0 → 1  (сквозной прогресс перехода)
+ *   --auth_fade      1 → 0 → 1 (уход и возврат контейнера со ссылкой)
+ * ===================================================================== */
+.stage{
+    --auth_timeline: 0;
+    --auth_fade: 1;
+}
+
+
+/*                    */
+/* посимвольный текст */
+/*                    */
+.typed{
+    position: relative;
+    display: inline-block;
+    white-space: pre;
+}
+/* Невидимая распорка: держит финальную ширину текста, чтобы строка
+   не «прыгала» при стирании, и отдаёт полный текст скринридерам. */
+.typedGhost{
+    opacity: 0;
+    white-space: pre;
+    pointer-events: none;
+}
+.typedLive{
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    user-select: none;
+}
+
+
+/*               */
+/* фоновые видео */
+/*               */
+.regVideo{
+    opacity: calc(1 - var(--auth_timeline, 1));
+}
+.loginVideo{
+    opacity: var(--auth_timeline, 0);
+}
+
+
+/*              */
+/* смена цветов */
+/*              */
+.color_PurpleToLemon{
+    color: color-mix(
+            in srgb,
+            var(--color_lemon-zest) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_purple-haze)
+    );
+}
+.backgroundColor_PurpleToLemon{
+    background-color: color-mix(
+            in srgb,
+            var(--color_lemon-zest) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_purple-haze)
+    );
+}
+.backgroundColor_WhiteToBlack{
+    background-color: color-mix(
+            in srgb,
+            var(--color_black-graphite) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_flowered-white)
+    );
+}
+.backgroundColor_BlackToWhite{
+    background-color: color-mix(
+            in srgb,
+            var(--color_flowered-white) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_black-graphite)
+    );
+}
+.color_BlackToWhite{
+    color: color-mix(
+            in srgb,
+            var(--color_flowered-white) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_black-graphite)
+    );
+}
+.color_WhiteToBlack{
+    color: color-mix(
+            in srgb,
+            var(--color_black-graphite) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_flowered-white)
+    );
+}
+.borderColor_LemonToPurple{
+    border-color: color-mix(
+            in srgb,
+            var(--color_lemon-zest) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_purple-haze)
+    );
+}
+
+/*                 */
+/* шейдер-градиент */
+/*                 */
+.color_shader_stop1{
+    color: color-mix(
+            in srgb,
+            '#12111F' calc(var(--auth_timeline, 0) * 100%),
+            '#171A0E'
+    );
+}
+.color_shader_stop2{
+    color: color-mix(
+            in srgb,
+            '#272445' calc(var(--auth_timeline, 0) * 100%),
+            '#2B3119'
+    );
+}
+.color_shader_stop3{
+    color: color-mix(
+            in srgb,
+            var(--color_purple-haze) calc(var(--auth_timeline, 0) * 100%),
+            var(--color_lemon-zest)
+    );
+}
+.color_shader_stop4{
+    color: color-mix(
+            in srgb,
+            '#CECAFC' calc(var(--auth_timeline, 0) * 100%),
+            '#F9FFE5'
+    );
+}
+.color_shader_stop5{
+    color: #FFFFFF;
+}
+
+
+/*                       */
+/* кнопка-переключатель  */
+/*                       */
+.fadeAnimation{
+    opacity: calc(0.6 * var(--auth_fade, 1));
+}
+/* Сброс оформления <button>: размеры, шрифт и цвет берутся из
+   .SignInUpButton в page.module.css. */
+.switchButton{
+    appearance: none;
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+/* наведение включает подчёркивание текста-кнопки */
+.switchButton:hover,
+.switchButton:focus-visible{
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+.switchButton[aria-disabled="true"]{
+    cursor: default;
+}

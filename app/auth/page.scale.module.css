@@ -1,0 +1,73 @@
+.root{
+    --page-k: calc(max(var(--k), var(--k) * .8));
+
+    --main_background-color: var(--color_black);
+
+    --title_top: calc(44 * var(--page-k));
+    --title_left: calc(-1 * var(--page-k));
+    --subtitle_top: calc(74 * var(--page-k));
+
+    --container_width: calc(512 * var(--page-k));
+    --container_height: calc(329 * var(--page-k));
+    --container_border-radius: calc(17 * var(--page-k));
+
+    --content_width: calc(192 * var(--page-k));
+    --content_height: calc(270 * var(--page-k));
+    --content_top: 50%;
+    --content_left: calc(284 * var(--page-k));
+
+    --logo_width: calc(68 * var(--page-k));
+    --logo_height: calc(36 * var(--page-k));
+
+    --line_width: 100%;
+    --line_height: calc(.5 * var(--page-k));
+    --line_left: calc(0 * var(--page-k));
+    --line_top: calc(102 * var(--page-k));
+
+    --EmailPasswordContainer_top: calc(121 * var(--page-k));
+    --EmailPasswordContainer_left: calc(0 * var(--page-k));
+    --EmailPasswordContainer_gap: calc(8 * var(--page-k));
+
+    --EmailPasswordLowContainer_gap: calc(2 * var(--page-k));
+    --EmailPasswordTextBox_padding:
+            calc(10 * var(--page-k))
+            calc(8 * var(--page-k))
+            calc(8 * var(--page-k))
+            calc(10 * var(--page-k));
+    --EmailPasswordTextBox_border-radius: calc(8 * var(--page-k));
+    --EmailPasswordTextBox_border-color: var(--color_purple-haze);
+    --EmailPasswordTextBox_border-size: calc(1 * var(--page-k));
+
+    --RegButtonContainer_top: calc(105 * var(--page-k));
+    --RegButtonContainer_left: 50%;
+    --RegButtonContainer_padding:
+            calc(8 * var(--page-k))
+            calc(0 * var(--page-k))
+            calc(8 * var(--page-k))
+            calc(0 * var(--page-k));
+    --RegButtonContainer_background-color: var(--color_purple-haze);
+    --RegButtonText_text-color: var(--color_flowered-white);
+    --RegButtonContainer_border-radius: calc(5 * var(--page-k));
+
+    --AlreadyHaveAccountContainer_top: calc(258 * var(--page-k));
+    --AlreadyHaveAccountContainer_left: 50%;
+    --AlreadyHaveAccountContainer_gap: calc(2 * var(--page-k));
+
+    --shader_width: calc(226 * var(--page-k));
+    --shader_height: calc(303 * var(--page-k));
+    --shader_border-radius: calc(17 * var(--page-k));
+    --shader_left: calc(14 * var(--page-k));
+    --ShaderText_left: calc(18 * var(--page-k));
+    --ShaderText_top: calc(20 * var(--page-k));
+    --ShaderText_text-size: calc(20 * var(--page-k));
+    --ShaderText_width: calc(173 * var(--page-k));
+
+    --title_text-size: calc(20 * var(--page-k));
+    --subtitle_text-size: calc(8.5 * var(--page-k));
+    --AlreadyHaveAccount_text-size: calc(9 * var(--page-k));
+    --SignInUpButton_text-size: calc(9 * var(--page-k));
+    --EmailPasswordTitle_text-size: calc(8.5 * var(--page-k));
+    --EmailPasswordTextBoxText_text-size: calc(7 * var(--page-k));
+    --EmailPasswordTextBoxText_text-width: calc(170 * var(--page-k));
+    --RegButtonText_text-size: calc(9.7 * var(--page-k));
+}
