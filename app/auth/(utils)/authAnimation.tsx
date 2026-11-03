@@ -44,12 +44,23 @@ const ERASE_WEIGHT = EraseTime / TotalTime;
 /* =====================================================================
  * 2. ИСТОЧНИКИ ФОНОВЫХ ВИДЕО
  * ===================================================================== */
+export type VideoSrcSet = {
+    desktop: string;
+    tablet: string;
+    mobile: string;
+};
 
-/** Фон режима «Регистрация». */
-export const RegBackgroundVideo = '/videos/RegBackgroundVideo.mp4';
+export const RegBackgroundVideo: VideoSrcSet = {
+    desktop: '/videos/RegBackgroundVideo.mp4',
+    tablet:  '/videos/RegBackgroundVideo.tablet.mp4',
+    mobile:  '/videos/RegBackgroundVideo.mobile.mp4',
+};
 
-/** Фон режима «Авторизация» — отдельный исходный файл. */
-export const LoginBackgroundVideo = '/videos/LoginBackgroundVideo.mp4';
+export const LoginBackgroundVideo: VideoSrcSet = {
+    desktop: '/videos/LoginBackgroundVideo.mp4',
+    tablet:  '/videos/LoginBackgroundVideo.tablet.mp4',
+    mobile:  '/videos/LoginBackgroundVideo.mobile.mp4',
+};
 
 /* =====================================================================
  * 3. ТЕКСТЫ ДВУХ СОСТОЯНИЙ ФОРМЫ

@@ -70,6 +70,88 @@
     --EmailPasswordTextBoxText_text-size: calc(7 * var(--page-k));
     --EmailPasswordTextBoxText_text-width: calc(170 * var(--page-k));
     --RegButtonText_text-size: calc(9.7 * var(--page-k));
+
+    --ShaderTextDesktop_opacity: 1.0;
+    --ShaderTextTablet_opacity: 0.0;
+}
+
+@media (min-width: 768px) and (max-width: 1280px){
+    .root{
+        --page-k: calc(100vw / 768 * .8);
+
+        --main_background-color: var(--color_black);
+
+        --title_top: calc(74 * var(--page-k));
+        --title_left: calc(0 * var(--page-k));
+        --subtitle_top: calc(124 * var(--page-k));
+
+        --container_width: calc(656 * var(--page-k));
+        --container_height: calc(521 * var(--page-k));
+        --container_border-radius: calc(29 * var(--page-k));
+
+        --content_width: calc(322 * var(--page-k));
+        --content_height: calc(453 * var(--page-k));
+        --content_top: 50%;
+        --content_left: calc(289 * var(--page-k));
+
+        --logo_width: calc(114 * var(--page-k));
+        --logo_height: calc(61 * var(--page-k));
+
+        --line_width: 100%;
+        --line_height: calc(.5 * var(--page-k));
+        --line_left: calc(0 * var(--page-k));
+        --line_top: calc(171 * var(--page-k));
+
+        --EmailPasswordContainer_top: calc(203 * var(--page-k));
+        --EmailPasswordContainer_left: calc(0 * var(--page-k));
+        --EmailPasswordContainer_gap: calc(13 * var(--page-k));
+
+        --EmailPasswordLowContainer_gap: calc(3 * var(--page-k));
+        --EmailPasswordTextBox_padding:
+                calc(17 * var(--page-k))
+                calc(15 * var(--page-k))
+                calc(15 * var(--page-k))
+                calc(17 * var(--page-k));
+        --EmailPasswordTextBox_border-radius: calc(9 * var(--page-k));
+        --EmailPasswordTextBox_border-color: var(--color_purple-haze);
+        --EmailPasswordTextBox_border-size: calc(1.5 * var(--page-k));
+
+        --RegButtonContainer_top: calc(175 * var(--page-k));
+        --RegButtonContainer_left: 50%;
+        --RegButtonContainer_padding:
+                calc(14 * var(--page-k))
+                calc(0 * var(--page-k))
+                calc(14 * var(--page-k))
+                calc(0 * var(--page-k));
+        --RegButtonContainer_background-color: var(--color_purple-haze);
+        --RegButtonText_text-color: var(--color_flowered-white);
+        --RegButtonContainer_border-radius: calc(9 * var(--page-k));
+
+        --AlreadyHaveAccountContainer_top: calc(433 * var(--page-k));
+        --AlreadyHaveAccountContainer_left: 50%;
+        --AlreadyHaveAccountContainer_gap: calc(5 * var(--page-k));
+
+        --shader_width: calc(237 * var(--page-k));
+        --shader_height: calc(496 * var(--page-k));
+        --shader_border-radius: calc(17 * var(--page-k));
+        --shader_left: calc(14 * var(--page-k));
+        --ShaderText_left: calc(18 * var(--page-k));
+        --ShaderText_top: calc(24 * var(--page-k));
+        --ShaderText_text-size: calc(30 * var(--page-k));
+        --ShaderText_width: calc(201 * var(--page-k));
+
+        --title_text-size: calc(34 * var(--page-k));
+        --subtitle_text-size: calc(14 * var(--page-k));
+        --AlreadyHaveAccount_text-size: calc(15 * var(--page-k));
+        --SignInUpButton_text-size: calc(15 * var(--page-k));
+        --EmailPasswordTitle_text-size: calc(14 * var(--page-k));
+        --EmailPasswordTextBoxText_text-size: calc(12 * var(--page-k));
+        --EmailPasswordTextBoxText_text-width: calc(285 * var(--page-k));
+        --RegButtonText_text-size: calc(16 * var(--page-k));
+
+        --ShaderTextDesktop_opacity: 0.0;
+        --ShaderTextTablet_opacity: 1.0;
+    }
 }
 
 @media (min-width: 320px) and (max-width: 768px){
@@ -139,5 +221,10 @@
         --EmailPasswordTextBoxText_text-size: calc(9 * var(--page-k));
         --EmailPasswordTextBoxText_text-width: calc(208 * var(--page-k));
         --RegButtonText_text-size: calc(12 * var(--page-k));
+
+        --ShaderTextDesktop_opacity: 0.0;
+        --ShaderTextTablet_opacity: 0.0;
     }
 }
+
+

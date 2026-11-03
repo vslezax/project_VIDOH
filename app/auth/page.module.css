@@ -1,7 +1,7 @@
 .main{
     position: relative;
     width: 100%;
-    min-height: 100vh;
+    height: calc(max(100vh, var(--container_height) * 1.2));
     overflow: hidden;
 
     display: flex;
@@ -34,8 +34,8 @@
     position: absolute;
     inset: 0;
 
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 
     object-fit: cover;
 
@@ -146,7 +146,8 @@
 .SignInUpButton,
 .EmailPasswordTitle,
 .EmailPasswordTextBoxText,
-.ShaderText{
+.ShaderTextDesktop,
+.ShaderTextTablet{
     font-family: var(--font-onest);
     line-height: 1.2;
     font-weight: 500;
@@ -183,7 +184,8 @@
     font-size: var(--EmailPasswordTextBoxText_text-size);
     opacity: .3;
 }
-.ShaderText{
+.ShaderTextDesktop,
+.ShaderTextTablet{
     position: absolute;
     left: var(--ShaderText_left);
     top: var(--ShaderText_top);
@@ -192,5 +194,6 @@
 
     font-size: var(--ShaderText_text-size);
     color: var(--color_flowered-white);
-    opacity: 1.0;
 }
+.ShaderTextDesktop{opacity: var(--ShaderTextDesktop_opacity)}
+.ShaderTextTablet{opacity: var(--ShaderTextTablet_opacity)}

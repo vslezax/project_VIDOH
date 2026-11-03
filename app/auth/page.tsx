@@ -12,11 +12,47 @@ import {
     TypedText,
     getAnimationVars,
     useAuthTransition,
+    VideoSrcSet,
 } from "./(utils)/authAnimation";
 
 import { AnimatedGradientShader } from "@/app/auth/(utils)/Shader";
 import { useMemo } from "react";
 import {shaderStops} from "@/app/auth/(utils)/shaderParams";
+
+/* выбор видео по разметке устройства */
+function ResponsiveVideo({
+                             sources,
+                             animClass,
+                         }: {
+    sources: VideoSrcSet;
+    animClass: string;
+}) {
+    return (
+        <div className={`${styles.BackgroundVideo} ${animClass}`} aria-hidden="true">
+            <div className={anim.videoDesktop}>
+                <NoisyVideo
+                    height="100%" width="100%"
+                    src={sources.desktop}
+                    grainAmount={0.3} grainSize={4.0} grainSpeed={25}
+                />
+            </div>
+            <div className={anim.videoTablet}>
+                <NoisyVideo
+                    height="100%" width="100%"
+                    src={sources.tablet}
+                    grainAmount={0.3} grainSize={4.0} grainSpeed={25}
+                />
+            </div>
+            <div className={anim.videoMobile}>
+                <NoisyVideo
+                    height="100%" width="100%"
+                    src={sources.mobile}
+                    grainAmount={0.3} grainSize={4.0} grainSpeed={25}
+                />
+            </div>
+        </div>
+    );
+}
 
 export default function Auth() {
     const { mode, phase, progress, isAnimating, toggleMode } = useAuthTransition();
@@ -28,31 +64,9 @@ export default function Auth() {
     const colorStops = useMemo(() => shaderStops(1 - timeline), [timeline]);
 
     return (
-        <main
-            className={`${styles.main} ${scale.root} ${anim.stage}`}
-            style={getAnimationVars(mode, phase, progress)}
-        >
-            <div className={`${styles.BackgroundVideo} ${anim.regVideo}`} aria-hidden="true">
-                <NoisyVideo
-                    height={"100%"}
-                    width={"100%"}
-                    src={RegBackgroundVideo}
-                    grainAmount={0.3}
-                    grainSize={4.0}
-                    grainSpeed={25}
-                />
-            </div>
-
-            <div className={`${styles.BackgroundVideo} ${anim.loginVideo}`} aria-hidden="true">
-                <NoisyVideo
-                    height={"100%"}
-                    width={"100%"}
-                    src={LoginBackgroundVideo}
-                    grainAmount={0.3}
-                    grainSize={4.0}
-                    grainSpeed={25}
-                />
-            </div>
+        <main className={`${styles.main} ${scale.root} ${anim.stage}`} style={getAnimationVars(mode, phase, progress)}>
+            <ResponsiveVideo sources={RegBackgroundVideo}   animClass={anim.regVideo} />
+            <ResponsiveVideo sources={LoginBackgroundVideo} animClass={anim.loginVideo} />
 
             <div className={`${styles.container} ${anim.backgroundColor_WhiteToBlack}`}>
                 <section
@@ -131,8 +145,11 @@ export default function Auth() {
                 </section>
 
                 <aside className={styles.shader} aria-label="Слоган">
-                    <p className={`${styles.ShaderText}`}>
+                    <p className={`${styles.ShaderTextDesktop}`}>
                         Позвольте себе отдохнуть душой от каждодневной рутины
+                    </p>
+                    <p className={`${styles.ShaderTextTablet}`}>
+                        Досуг, отдых, развлечения, которых вы достойны
                     </p>
                     <AnimatedGradientShader
                         width="100%"
